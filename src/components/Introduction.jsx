@@ -11,29 +11,23 @@ export function Introduction() {
     >
       <Container className="text-lg tracking-tight text-slate-700">
         <p className="font-display text-4xl font-bold tracking-tight text-slate-900">
-          “Everything Starts as a Square” is a book and video course that
-          teaches you a simple method to designing icons that anyone can learn.
+          Hi, I’m Jeremy Dudet
         </p>
         <p className="mt-4">
-          Before I learned how to design icons myself, I always imagined that
-          they were drawn by hand using the pen tool, some sort of fancy
-          graphics tablet, and hours and hours spent manually fine-tuning bezier
-          curves.
+          Currently, I'm working at UberEats helping grocery and retail stores sync their inventory. I work with systems that pull data from stores and convert it into a format Uber can use.
         </p>
         <p className="mt-4">
-          But it turns out this isn’t how great icon designers work at all.
+          My goal is to build cool stuff that helps people.
         </p>
         <p className="mt-4">
-          In “Everything Starts as a Square”, you’ll learn the systems experts
-          use to create pixel perfect icons, without relying on a steady hand.
+          I really enjoy:
         </p>
         <ul role="list" className="mt-8 space-y-3">
           {[
-            'Using boolean operations to combine basic shapes into complex icons',
-            'How to adapt icons to different sizes',
-            'Translating icons from an outline style to a solid style',
-            'Identifying the characteristics that make an icon set cohesive',
-            'Figma features and keyboard shortcuts to speed up your workflow',
+            'Building full-stack applications with JavaScript and React',
+            'Learning about AI and how to implement it in my work',
+            'Building side projects',
+            'Hiking, nice cafes, and going to the gym',
           ].map((feature) => (
             <li key={feature} className="flex">
               <CheckIcon className="h-8 w-8 flex-none fill-blue-500" />
@@ -42,16 +36,14 @@ export function Introduction() {
           ))}
         </ul>
         <p className="mt-8">
-          By the end of the book, you’ll have all the confidence you need to dig
-          in and start creating beautiful icons that can hold their own against
-          any of the sets you can find online.
+          If this sounds interesting, I’d love to share more about what I’m working on.
         </p>
         <p className="mt-10">
           <Link
-            to="/free-chapters"
+            to="/learn-more"
             className="text-base font-medium text-blue-600 hover:text-blue-800"
           >
-            Get two free chapters straight to your inbox{' '}
+            Check it out here{' '}
             <span aria-hidden="true">&rarr;</span>
           </Link>
         </p>
