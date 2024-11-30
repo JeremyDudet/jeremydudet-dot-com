@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { Container } from '@/components/Container'
 import { GridPattern } from '@/components/GridPattern'
 import { StarRating } from '@/components/StarRating'
@@ -28,12 +26,10 @@ export function Testimonial({
           </blockquote>
           <figcaption className="mt-10 flex items-center sm:justify-center">
             <div className="overflow-hidden rounded-full bg-slate-200">
-              <Image
+              <img
                 className="h-12 w-12 object-cover"
                 src={author.image}
                 alt=""
-                width={48}
-                height={48}
               />
             </div>
             <div className="ml-4">

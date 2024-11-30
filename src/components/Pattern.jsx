@@ -9,14 +9,15 @@ export function Pattern({
     [1, 0, 1, 1, 0, 0, 0, 1],
     [0, 1, 0, 1, 1, 0, 1, 0],
     [1, 0, 1, 1, 0, 0, 0, 1],
-  ]
+  ],
+  ...otherProps
 }) {
   let id = useId()
   let width = pattern[0].length * size + (pattern[0].length - 1) * gapX
   let height = pattern.length * size + (pattern.length - 1) * gapY
 
   return (
-    <svg aria-hidden="true" width={width} height={height} {...props}>
+    <svg aria-hidden="true" width={width} height={height} {...otherProps}>
       <defs>
         <symbol id={`${id}-0`} width={size} height={size}>
           <rect className="fill-blue-500" width={size} height={size} />

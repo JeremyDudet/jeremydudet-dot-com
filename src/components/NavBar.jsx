@@ -1,6 +1,4 @@
-'use client'
-
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import clsx from 'clsx'
 
@@ -42,8 +40,8 @@ function MenuIcon({
 }
 
 export function NavBar() {
-  let navBarRef = useRef<React.ElementRef<'div'>>(null)
-  let [activeIndex, setActiveIndex] = useState<number | null>(null)
+  let navBarRef = useRef(null)
+  let [activeIndex, setActiveIndex] = useState(null)
   let mobileActiveIndex = activeIndex === null ? 0 : activeIndex
 
   useEffect(() => {

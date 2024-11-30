@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { Container } from '@/components/Container'
 import { SectionHeading } from '@/components/SectionHeading'
 import duotoneImage from '@/images/screencasts/duotone.svg'
@@ -90,7 +88,7 @@ export function Screencasts() {
                 }}
               >
                 <div className="flex overflow-hidden rounded shadow-sm">
-                  <Image src={video.image} alt="" unoptimized />
+                  <img src={video.image} alt="" />
                 </div>
                 <div className="absolute bottom-2 left-2 flex items-center rounded-lg bg-black/30 px-1.5 py-0.5 text-sm text-white [@supports(backdrop-filter:blur(0))]:bg-white/10 [@supports(backdrop-filter:blur(0))]:backdrop-blur">
                   <PlayIcon className="h-4 w-4 fill-current stroke-current" />

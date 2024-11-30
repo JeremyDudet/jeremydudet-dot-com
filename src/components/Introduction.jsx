@@ -1,7 +1,6 @@
-import Link from 'next/link'
-
 import { CheckIcon } from '@/components/CheckIcon'
 import { Container } from '@/components/Container'
+import { Link } from 'react-router-dom'
 
 export function Introduction() {
   return (
@@ -49,7 +48,7 @@ export function Introduction() {
         </p>
         <p className="mt-10">
           <Link
-            href="#free-chapters"
+            to="/free-chapters"
             className="text-base font-medium text-blue-600 hover:text-blue-800"
           >
             Get two free chapters straight to your inbox{' '}

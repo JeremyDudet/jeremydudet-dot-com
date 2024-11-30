@@ -1,5 +1,3 @@
-'use client'
-
 import { Children, createContext, useContext, useState } from 'react'
 
 export function ArrowDownIcon(props) {

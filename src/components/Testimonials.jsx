@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import clsx from 'clsx'
 
 import { Container } from '@/components/Container'
@@ -120,12 +119,10 @@ function Testimonial({
       </blockquote>
       <figcaption className="mt-6 flex items-center">
         <div className="overflow-hidden rounded-full bg-slate-50">
-          <Image
+          <img
             className="h-12 w-12 object-cover"
             src={author.image}
             alt=""
-            width={48}
-            height={48}
           />
         </div>
         <div className="ml-4">

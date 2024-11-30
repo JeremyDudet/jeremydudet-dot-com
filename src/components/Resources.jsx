@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { Container } from '@/components/Container'
 import { SectionHeading } from '@/components/SectionHeading'
 import abstractBackgroundImage from '@/images/resources/abstract-background.png'
@@ -15,7 +13,7 @@ const resources = [
     image: function FigmaImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(#2C313D_35%,#000)]">
-          <Image src={figmaImage} alt="" unoptimized />
+          <img src={figmaImage} alt="" />
         </div>
       )
     },
@@ -27,17 +25,15 @@ const resources = [
     image: function VideoPlayerImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Image
+          <img
             className="absolute inset-0 h-full w-full object-cover"
             src={abstractBackgroundImage}
             alt=""
-            sizes="(min-width: 1280px) 21rem, (min-width: 1024px) 33vw, (min-width: 768px) 19rem, (min-width: 640px) 50vw, 100vw"
           />
-          <Image
+          <img
             className="relative"
             src={videoPlayerImage}
             alt=""
-            unoptimized
           />
         </div>
       )
@@ -50,7 +46,7 @@ const resources = [
     image: function DiscordImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center bg-[#6366F1]">
-          <Image src={discordImage} alt="" unoptimized />
+          <img src={discordImage} alt="" />
         </div>
       )
     },
