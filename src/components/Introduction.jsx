@@ -1,6 +1,9 @@
 import { CheckIcon } from '@/components/CheckIcon'
+import { LinkedInIcon } from '@/components/LinkedInIcon'
+import { GitHubIcon } from '@/components/GitHubIcon'
+import { UberEatsLogo } from '@/components/UberEatsLogo'
+import { Link } from '@/components/Link'
 import { Container } from '@/components/Container'
-import { Link } from 'react-router-dom'
 
 export function Introduction() {
   return (
@@ -14,20 +17,20 @@ export function Introduction() {
           Hi, I’m Jeremy Dudet
         </p>
         <p className="mt-4">
-          Currently, I'm working at UberEats helping grocery and retail stores sync their inventory. I work with systems that pull data from stores and convert it into a format Uber can use.
+          Currently, I'm working at <span className="inline-block align-middle mx-1"><UberEatsLogo className="inline-block h-[18px] w-[90px] -translate-y-[4px]" /></span> helping grocery and retail stores sync their inventory. I work with systems that pull data from stores and convert it into a format Uber can use.
         </p>
         <p className="mt-4">
-          My goal is to build cool stuff that helps people.
+          My goal, generally speaking, is to build cool stuff that helps people.
         </p>
         <p className="mt-4">
           I really enjoy:
         </p>
         <ul role="list" className="mt-8 space-y-3">
           {[
-            'Building full-stack applications with JavaScript and React',
-            'Learning about AI and how to implement it in my work',
+            'Building full-stack apps with JavaScript and React',
+            'Learning about this little thing called AI and how to implement it in my work',
             'Building side projects',
-            'Hiking, nice cafes, and going to the gym',
+            'pretty much all things tech...!',
           ].map((feature) => (
             <li key={feature} className="flex">
               <CheckIcon className="h-8 w-8 flex-none fill-blue-500" />
@@ -36,17 +39,24 @@ export function Introduction() {
           ))}
         </ul>
         <p className="mt-8">
-          If this sounds interesting, I’d love to share more about what I’m working on.
+          When I'm not coding, you'll find me hiking trails, exploring local restaurants, or at the gym.
         </p>
-        <p className="mt-10">
+        <div className="mt-4 flex gap-4">
           <Link
-            to="/learn-more"
-            className="text-base font-medium text-blue-600 hover:text-blue-800"
+            target="_blank"
+            href="https://www.linkedin.com/in/jeremydudet/"
+            className="block h-8 w-8"
           >
-            Check it out here{' '}
-            <span aria-hidden="true">&rarr;</span>
+            <LinkedInIcon className="h-8 w-8 fill-blue-600" />
           </Link>
-        </p>
+          <Link
+            target="_blank"
+            href="https://github.com/JeremyDudet"
+            className="block h-8 w-8"
+          >
+            <GitHubIcon className="h-8 w-8 fill-[#0f172a]" />
+          </Link>
+        </div>
       </Container>
     </section>
   )
