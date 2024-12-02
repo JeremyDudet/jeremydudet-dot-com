@@ -1,6 +1,5 @@
 import { GridPattern } from '@/components/GridPattern'
 import { SectionHeading } from '@/components/SectionHeading'
-import authorImage from '@/images/avatars/author.png'
 import jeremyImage from '@/images/jeremy3.png'
 import { Link } from '@/components/Link'
 import { GitHubIcon } from '@/components/GitHubIcon'
