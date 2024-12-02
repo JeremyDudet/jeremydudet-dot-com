@@ -1,56 +1,38 @@
 import { Container } from '@/components/Container'
 import { SectionHeading } from '@/components/SectionHeading'
-import duotoneImage from '@/images/screencasts/duotone.svg'
-import gridsImage from '@/images/screencasts/grids.svg'
 import setupImage from '@/images/screencasts/setup.svg'
+import konditoreiWebsite from '@/images/screenshots/konditorei-website.jpeg'
+import inventorei from '@/images/screenshots/inventorei.jpeg'
 import strokesImage from '@/images/screencasts/strokes.svg'
-
+import duotoneImage from '@/images/screencasts/duotone.svg'
+import barzolaWebsite from '@/images/screenshots/barzola.jpeg'
+import craftedAt from '@/images/screenshots/oakAndViolet.jpeg'
 const projects = [
   {
-    title: 'Getting started with Figma',
+    title: 'Inventorei - a Inventory Management System for Konditorei Cafe',
     description:
-      'Get familiar with the Figma UI, the different tools it offers, and the most important features.',
-    image: setupImage,
-    runtime: { minutes: 16, seconds: 54 },
+      "An ingredient-level inventory management for Konditorei Cafe. It allows the team to simply input what we have in stock and it auto-generates a shopping list.",
+    image: inventorei,
   },
   {
-    title: 'Setting up your artboard',
+    title: 'Konditorei Website',
     description:
-      'Learn how to create a new artboard and configure your grid and rulers for designing icons.',
-    image: gridsImage,
-    runtime: { minutes: 9, seconds: 12 },
+      'A website for Konditorei Cafe built with Astro.js and Tailwind CSS.',
+    image: konditoreiWebsite,
   },
   {
-    title: 'Designing your first icon',
+    title: 'Barzola.fyi',
     description:
-      'Using basic shapes and boolean operations, learn how to design your own notification icon from scratch.',
-    image: strokesImage,
-    runtime: { minutes: 23, seconds: 25 },
+      'A website for Barzola built with Next.js and Tailwind CSS.',
+    image: barzolaWebsite,
   },
   {
-    title: 'Advanced design techniques',
+    title: 'Crafted@Oak&Violet',
     description:
-      'Learn the techniques you need to know to adapt your original icon to a modern duotone style.',
-    image: duotoneImage,
-    runtime: { minutes: 28, seconds: 44 },
-  },
+      'A website for Oak & Violet bar to show all the cocktails they can make with the ingredients they have in stock built with React and Firebase.',
+    image: craftedAt,
+  },  
 ]
-
-export function PlayIcon(props) {
-  return (
-    <svg
-      aria-hidden="true"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      viewBox="0 0 16 16"
-      {...props}
-    >
-      <path d="M6.75 10.25v-4.5L10.25 8l-3.5 2.25Z" />
-      <circle cx="8" cy="8" r="6.25" fill="none" />
-    </svg>
-  )
-}
 
 export function Projects() {
   return (
@@ -63,15 +45,6 @@ export function Projects() {
         <SectionHeading number="1" id="screencasts-title">
           Projects
         </SectionHeading>
-        {/* <p className="mt-8 font-display text-4xl font-bold tracking-tight text-slate-900">
-          Over an hour of high quality, step-by-step video content to sharpen
-          your icon design workflow.
-        </p>
-        <p className="mt-4 text-lg tracking-tight text-slate-700">
-          Learn how to design your very first icons in a series of screencasts
-          that will teach you everything you need to know to go from beginner to
-          pro in just over an hour.
-        </p> */}
       </Container>
       <Container size="lg" className="mt-16">
         <ol
@@ -81,26 +54,14 @@ export function Projects() {
           {projects.map((video) => (
             <li key={video.title} className="[counter-increment:video]">
               <div
-                className="relative flex h-44 items-center justify-center rounded-2xl px-6 shadow-lg"
+                className="relative flex h-40 items-center justify-center rounded-xl shadow-lg"
                 style={{
-                  backgroundImage:
-                    'conic-gradient(from -49.8deg at 50% 50%, #7331FF 0deg, #00A3FF 59.07deg, #4E51FF 185.61deg, #39DBFF 284.23deg, #B84FF1 329.41deg, #7331FF 360deg)',
+                  backgroundImage: `url(${video.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
                 }}
-              >
-                <div className="flex overflow-hidden rounded shadow-sm">
-                  <img src={video.image} alt="" />
-                </div>
-                <div className="absolute bottom-2 left-2 flex items-center rounded-lg bg-black/30 px-1.5 py-0.5 text-sm text-white [@supports(backdrop-filter:blur(0))]:bg-white/10 [@supports(backdrop-filter:blur(0))]:backdrop-blur">
-                  <PlayIcon className="h-4 w-4 fill-current stroke-current" />
-                  <time
-                    dateTime={`${video.runtime.minutes}m ${video.runtime.seconds}s`}
-                    className="ml-2"
-                  >
-                    {`${video.runtime.minutes}:${video.runtime.seconds
-                      .toString()
-                      .padStart(2, '0')}`}
-                  </time>
-                </div>
+              > 
               </div>
               <h3 className="mt-8 text-base font-medium tracking-tight text-slate-900 before:mb-2 before:block before:font-mono before:text-sm before:text-slate-500 before:content-[counter(video,decimal-leading-zero)]">
                 {video.title}

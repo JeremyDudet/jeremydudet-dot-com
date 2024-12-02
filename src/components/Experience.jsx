@@ -7,6 +7,8 @@ import {
 import { SectionHeading } from '@/components/SectionHeading'
 import { UberLogo } from '@/components/UberLogo'
 import { KonditoreiLogo } from '@/components/KonditoreiLogo'
+import { BarZolaLogo } from '@/components/BarZolaLogo'
+import { OakAndVioletLogo } from '@/components/OakAndVioletLogo'
 const experiences = [
   {
     company: 'Uber',
@@ -26,7 +28,7 @@ const experiences = [
   },
   {
     company: 'Zola + BarZola',
-    logo: null,
+    logo: <BarZolaLogo className="w-28 h-16" />,
     positions: {
       'Team Member - Server & Bartender': "December 2021 - May 2023",
       'IT Support': 'April 2022 - December 2022'
@@ -34,32 +36,11 @@ const experiences = [
   },
   {
     company: 'Oak+Violet',
-    logo: null,
+    logo: <OakAndVioletLogo className="w-18 h-24" />,
     positions: {
       'Bartender': "October 2018 - November 2021"
     }
   },
-  {
-    company: 'The Village Pub',
-    logo: null,
-    positions: {
-      'Bartender': "October 2017 - October 2018"
-    }
-  },
-  {
-    company: 'BirdDog',
-    logo: null,
-    positions: {
-      'Server': "February 2017 - February 2018"
-    }
-  },
-  {
-    company: 'Cafe Borrone',
-    logo: null,
-    positions: {
-      'Team Member': "October 2014 - October 2016"
-    }
-  }
 ]
 
 export function Experience() {

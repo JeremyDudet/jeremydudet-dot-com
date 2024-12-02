@@ -1,52 +1,70 @@
 import { Container } from '@/components/Container'
 import { SectionHeading } from '@/components/SectionHeading'
-import abstractBackgroundImage from '@/images/resources/abstract-background.png'
 import discordImage from '@/images/resources/discord.svg'
-import figmaImage from '@/images/resources/figma.svg'
-import videoPlayerImage from '@/images/resources/video-player.svg'
+import figmaLogo from './../../public/figma.png'
+import { NodeLogo } from './NodeLogo'
+import { BunLogo } from './BunLogo'
+import { ReactLogo } from './ReactLogo'
+import elephant from './../../public/elephant.png'
 
 const skills = [
   {
-    title: 'Figma icon templates',
+    title: 'Front-end Development',
     description:
-      'Pefectly structured templates for quickly designing new icons at dozens of common sizes.',
+      "I build modern websites with React, making them both beautiful and functional. From responsive layouts to smooth interactions, I love bringing designs to life in the browser.",
+    image: function FrontEndImage() {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center gap-8 bg-[radial-gradient(#2B313D_45%,#090A0A)]">            
+            <ReactLogo className="w-1/2 hover:scale-110 transition-transform" />
+        </div>
+      )
+    },
+  },
+  {
+    title: 'Server-side Development',
+    description:
+      "I like to use Node.js, Bun.js, and Express to build APIs and real-time features that power websites and apps.",
+    image: function ServerSideImage() {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center gap-8 bg-[radial-gradient(#2B313D_45%,#090A0A)]">
+            <NodeLogo className="w-1/4 hover:scale-110 transition-transform" /> 
+            <BunLogo className="w-1/3 hover:scale-110 transition-transform" />
+        </div>
+      )
+    },
+  },
+  {
+    title: 'SQL',
+    description:
+      "I love structuring databases and writing SQL queries to get exactly what you need. PostgreSQL and MySQL? I've got them both covered.",
+    image: function SQLImage() {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center gap-8 bg-[radial-gradient(#2B313D_45%,#090A0A)]">            
+            <img src={elephant} className="w-1/2 hover:scale-110 transition-transform" />
+        </div>
+      )
+    },
+  },
+  {
+    title: 'Figma',
+    description:
+      "While I'm not a professional designer, I love using Figma to mock up my ideas and bring other people's designs to life. I can work from existing design systems or create basic mockups to get projects started. It's a skill I'm always improving!",
     image: function FigmaImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(#2C313D_35%,#000)]">
-          <img src={figmaImage} alt="" />
+          <img src={figmaLogo} className="w-1/4 hover:scale-110 transition-transform" alt="" />
         </div>
       )
     },
   },
   {
-    title: 'Weekly icon teardowns',
+    title: 'More to Come',
     description:
-      'Weekly videos where we dissect and recreate beautiful icons we find on the web.',
-    image: function VideoPlayerImage() {
+      "Currently learning Go, Windows Batch Scripting, and Python at Uber and diving deep into system design for scalable applications. The tech world never stops evolving.",
+    image: function ComingImage() {
       return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <img
-            className="absolute inset-0 h-full w-full object-cover"
-            src={abstractBackgroundImage}
-            alt=""
-          />
-          <img
-            className="relative"
-            src={videoPlayerImage}
-            alt=""
-          />
-        </div>
-      )
-    },
-  },
-  {
-    title: 'Community of icon designers',
-    description:
-      "A private Discord server where you can get help and give feedback on each others' work.",
-    image: function DiscordImage() {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#6366F1]">
-          <img src={discordImage} alt="" />
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-blue-400 to-emerald-400">
+          <span className="text-[80px]">🚀</span>
         </div>
       )
     },
