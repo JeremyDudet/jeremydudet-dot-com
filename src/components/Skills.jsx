@@ -40,7 +40,7 @@ const skills = [
     image: function SQLImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center gap-8 bg-[radial-gradient(#2B313D_45%,#090A0A)]">            
-            <img src={elephant} className="w-1/2 hover:scale-110 transition-transform" />
+            <img src={elephant} className="w-1/3 hover:scale-110 transition-transform" />
         </div>
       )
     },
