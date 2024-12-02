@@ -15,7 +15,7 @@ const skills = [
     image: function FrontEndImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center gap-8 bg-[radial-gradient(#2B313D_45%,#090A0A)]">            
-            <ReactLogo className="w-1/2 hover:scale-110 transition-transform" />
+            <ReactLogo className="w-1/3 hover:scale-110 transition-transform" />
         </div>
       )
     },
