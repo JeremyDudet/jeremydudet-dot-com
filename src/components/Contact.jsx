@@ -4,6 +4,7 @@ import jeremyImage from '@/images/jeremy3.png'
 import { Link } from '@/components/Link'
 import { GitHubIcon } from '@/components/GitHubIcon'
 import { LinkedInIcon } from '@/components/LinkedInIcon'
+import { ResumeIcon } from '@/components/ResumeIcon'
 
 function XIcon(props) {
   return (
@@ -56,6 +57,13 @@ export function Contact() {
               >
                 <GitHubIcon className="h-10 w-10 fill-current" />
                 <span className="ml-4">Follow on GitHub</span>
+              </Link>
+              <Link
+                href="https://docs.google.com/document/d/1nsesUtw6HBj_iqDslqgkOHYwD_-Qz9cQPmfjdRdTjGs/edit?tab=t.0#heading=h.ohn8az5e7lg"
+                className="inline-flex items-center text-base font-medium tracking-tight text-slate-900"
+              >
+                <ResumeIcon className="h-10 w-10 fill-current" />
+                <span className="ml-4">View Resume</span>
               </Link>
             </p>
           </div>

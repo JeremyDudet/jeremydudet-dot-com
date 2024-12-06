@@ -4,7 +4,7 @@ import { GitHubIcon } from '@/components/GitHubIcon'
 import { UberEatsLogo } from '@/components/UberEatsLogo'
 import { Link } from '@/components/Link'
 import { Container } from '@/components/Container'
-
+import { ResumeIcon } from '@/components/ResumeIcon'
 export function Introduction() {
   return (
     <section
@@ -55,6 +55,12 @@ export function Introduction() {
             className="block h-8 w-8"
           >
             <GitHubIcon className="h-8 w-8 fill-[#0f172a]" />
+          </Link>
+          <Link
+            href="https://docs.google.com/document/d/1nsesUtw6HBj_iqDslqgkOHYwD_-Qz9cQPmfjdRdTjGs/edit?tab=t.0#heading=h.ohn8az5e7lg"
+            className="block h-8 w-8"
+          >
+            <ResumeIcon className="h-10 w-10 fill-[#0f172a]" />
           </Link>
         </div>
       </Container>
