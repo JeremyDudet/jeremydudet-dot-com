@@ -41,28 +41,29 @@ export function Introduction() {
         <p className="mt-8">
           When I'm not coding, you'll find me hiking trails, exploring local restaurants, or at the gym.
         </p>
-        <div className="mt-4 flex gap-4">
-          <Link
-            target="_blank"
-            href="https://www.linkedin.com/in/jeremydudet/"
-            className="block h-8 w-8"
-          >
-            <LinkedInIcon className="h-8 w-8 fill-blue-600" />
-          </Link>
-          <Link
-            target="_blank"
-            href="https://github.com/JeremyDudet"
-            className="block h-8 w-8"
-          >
-            <GitHubIcon className="h-8 w-8 fill-[#0f172a]" />
-          </Link>
-          <Link
-            href="https://docs.google.com/document/d/1nsesUtw6HBj_iqDslqgkOHYwD_-Qz9cQPmfjdRdTjGs/edit?tab=t.0#heading=h.ohn8az5e7lg"
-            className="block h-8 w-8"
-          >
-            <ResumeIcon className="h-10 w-10 fill-[#0f172a]" />
-          </Link>
-        </div>
+        <p className="mt-8 flex flex-col md:flex-row gap-4">      
+              <Link
+                href="https://www.linkedin.com/in/jeremydudet/"
+                className="inline-flex items-center text-base font-medium tracking-tight text-slate-900"
+              >
+                <LinkedInIcon className="h-10 w-10 fill-blue-600" />
+                <span className="ml-4">Contact on LinkedIn</span>
+              </Link>
+              <Link
+                href="https://github.com/JeremyDudet"
+                className="inline-flex items-center text-base font-medium tracking-tight text-slate-900"
+              >
+                <GitHubIcon className="h-10 w-10 fill-current" />
+                <span className="ml-4">Follow on GitHub</span>
+              </Link>
+              <Link
+                href="https://docs.google.com/document/d/1nsesUtw6HBj_iqDslqgkOHYwD_-Qz9cQPmfjdRdTjGs/edit?tab=t.0#heading=h.ohn8az5e7lg"
+                className="inline-flex items-center text-base font-medium tracking-tight text-slate-900"
+              >
+                <ResumeIcon className="h-10 w-10 fill-current" />
+                <span className="ml-4">View Resume</span>
+              </Link>
+            </p>
       </Container>
     </section>
   )
