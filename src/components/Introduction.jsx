@@ -27,7 +27,7 @@ export function Introduction() {
         </p>
         <ul role="list" className="mt-8 space-y-3">
           {[
-            'Building full-stack apps with JavaScript and React',
+            'Building full-stack apps with TypeScript and React',
             'Learning about this little thing called AI and how to implement it in my work',
             'Building side projects',
             'pretty much all things tech...!',

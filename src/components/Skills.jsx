@@ -60,7 +60,7 @@ const skills = [
   {
     title: 'More to Come',
     description:
-      "Currently learning Go, Windows Batch Scripting, and Python at Uber and diving deep into system design for scalable applications. The tech world never stops evolving.",
+      "Currently learning Go, Windows Batch Scripting, and Python while working at Uber. In my free time, I'm diving into LangChain for AI applications. The tech world never stops evolving. It's exciting to see where it goes!",
     image: function ComingImage() {
       return (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-blue-400 to-emerald-400">
