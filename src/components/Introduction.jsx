@@ -43,7 +43,7 @@ export function Introduction() {
               <a href="https://stockcount.io" className="text-blue-600 dark:text-blue-400 hover:underline">
                 <Text>stockcount.io</Text>
               </a>
-              <Text>Voice (speech-to-crud) inventory management app for easy stock counting and for automating day-to-day managerial accounting tasks for small businesses. </Text>
+              <Text>Voice (speech-to-crud) inventory management app for easy inventory counting and for automating day-to-day managerial accounting tasks. </Text>
             </li>
           </ul>
         </div>
