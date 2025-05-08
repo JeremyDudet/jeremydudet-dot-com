@@ -3,10 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Jeremy Dudet</title>
+    <style>
+      :root {
+        --font-sans: Inter, sans-serif;
+        --font-sans--font-feature-settings: 'cv11';
+      }
+      body {
+        font-family: var(--font-sans);
+        font-feature-settings: var(--font-sans--font-feature-settings);
+      }
+    </style>
   </head>
-  <body>
+  <body class="text-zinc-950 antialiased bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:lg:bg-zinc-950">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
