@@ -56,9 +56,10 @@ export function Introduction() {
                 <Text>stockcount.io</Text>
               </a>
               <Text>
-                Voice (speech-to-crud) inventory management app for easy
-                inventory counting and for automating day-to-day managerial
-                accounting tasks.{" "}
+                The tool I wish I had when working in F&B retail. A voice
+                (speech-to-crud) inventory management app for easy inventory
+                counting and for automating day-to-day managerial accounting
+                tasks.{" "}
               </Text>
             </li>
           </ul>
