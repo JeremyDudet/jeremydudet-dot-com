@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import GitHubCalendar from "react-github-calendar";
+import { Heading } from "@/components/ui/heading";
 
 const lightTheme = {
   light: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
@@ -133,8 +134,8 @@ const GitHubStats = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">github stats</h2>
-      <div ref={calendarRef} className="github-calendar-container">
+      <Heading level={3}>github stats</Heading>
+      <div ref={calendarRef} className="github-calendar-container mt-4">
         {showCalendar && (
           <div className="calendar-fade-in">
             <GitHubCalendar

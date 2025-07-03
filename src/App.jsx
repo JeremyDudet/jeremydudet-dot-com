@@ -65,7 +65,7 @@ export default function App() {
                     </li>
                   </ul>
                 </div>
-                <div className="mt-8">
+                <div className="mt-10">
                   <GitHubStats />
                 </div>
                 <div className="text-sm mt-8 flex flex-col md:flex-row gap-4">
