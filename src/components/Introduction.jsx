@@ -10,11 +10,11 @@ export function Introduction() {
       className="flex flex-col items-center"
     >
       <Container className="text-lg text-zinc-600 dark:text-zinc-400">
-        <Heading level={1}>Jeremy Dudet</Heading>
-        <Text>Software Developer</Text>
+        <Heading level={1}>jeremy dudet</Heading>
+        <Text>software developer</Text>
 
         <div className="mt-8">
-          <Heading level={3}>Work</Heading>
+          <Heading level={3}>work</Heading>
           <ul className="mt-4 space-y-4">
             <li>
               <Text>Uber</Text>
@@ -46,7 +46,7 @@ export function Introduction() {
           </ul>
         </div>
         <div className="mt-8">
-          <Heading level={3}>Projects</Heading>
+          <Heading level={3}>projects</Heading>
           <ul className="mt-4 space-y-4">
             <li>
               <a
