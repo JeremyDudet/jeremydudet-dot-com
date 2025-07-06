@@ -11,11 +11,11 @@ export default function App() {
         <div className="grow px-6 py-12 rounded-lg bg-white ring-1 shadow-xs ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 h-full min-h-full">
           
               <Container className="text-lg text-zinc-800 dark:text-zinc-200">
-                <Heading level={1}>jeremy dudet</Heading>
-                <Text>software developer</Text>
+                <Heading level={1}>Jeremy Dudet</Heading>
+                <Text>A willing and active participant in problem-solving.</Text>                
 
                 <div className="mt-8">
-                  <Heading level={3}>work</Heading>
+                  <Heading level={3}>Employment</Heading>
                   <ul className="mt-4 space-y-4">
                     <li>
                       <Text>Uber</Text>
@@ -45,7 +45,7 @@ export default function App() {
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <Heading level={3}>projects</Heading>
+                  <Heading level={3}>Products</Heading>
                   <ul className="mt-4 space-y-4">
                     <li>
                       <a
