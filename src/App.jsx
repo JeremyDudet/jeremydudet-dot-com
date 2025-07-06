@@ -10,7 +10,7 @@ export default function App() {
       <main className="flex flex-1 flex-col pb-2 min-w-0 pt-2 pr-2 pl-2 min-h-screen h-full">
         <div className="grow px-6 py-12 rounded-lg bg-white ring-1 shadow-xs ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 h-full min-h-full">
           
-              <Container className="text-lg text-zinc-600 dark:text-zinc-400">
+              <Container className="text-lg text-zinc-800 dark:text-zinc-200">
                 <Heading level={1}>jeremy dudet</Heading>
                 <Text>software developer</Text>
 
@@ -31,8 +31,7 @@ export default function App() {
                       <Text>IT guy | Operations Manager</Text>
                       <Text>apr '23 - jun '24</Text>
                       <Text>
-                        Built a full-stack inventory management system, reducing food
-                        waste and optimizing stock tracking.
+                        Built custom full-stack inventory management system.
                       </Text>
                     </li>
                     <li>
@@ -40,8 +39,7 @@ export default function App() {
                       <Text>IT guy | Staff Member</Text>
                       <Text>dec '21 - may '23</Text>
                       <Text>
-                        Developed an internal web application for restaurant staff,
-                        integrating Toast POS systems via APIs.
+                        Developed an internal web application for restaurant staff.
                       </Text>
                     </li>
                   </ul>
@@ -57,10 +55,8 @@ export default function App() {
                         <Text>stockcount.io</Text>
                       </a>
                       <Text>
-                        The tool I wish I had when working in F&B retail. A voice
-                        (speech-to-crud) inventory management app for easy inventory
-                        counting and for automating day-to-day managerial accounting
-                        tasks.{" "}
+                        Helping restaurant operators save time on restaurant inventory, cost management, and accounting tasks.
+                        Just speak or type to let our AI handle stock counts, cost tracking, and financial reports in seconds.
                       </Text>
                     </li>
                   </ul>
