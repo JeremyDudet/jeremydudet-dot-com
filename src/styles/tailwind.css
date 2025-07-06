@@ -3,37 +3,121 @@
 @tailwind utilities;
 
 @layer components {
-  .github-calendar-container {
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #888 #f1f1f1;
+  /* Always reserve space for scrollbars to prevent layout shift */
+  .github-calendar-container,
+  .github-calendar-container *,
+  .github-calendar-container svg,
+  .github-calendar-container div {
+    scrollbar-width: thin !important;
+    scrollbar-color: transparent transparent !important;
+    -ms-overflow-style: none !important;
   }
   
-  .github-calendar-container::-webkit-scrollbar {
-    height: 8px;
+  .github-calendar-container::-webkit-scrollbar,
+  .github-calendar-container *::-webkit-scrollbar,
+  .github-calendar-container svg::-webkit-scrollbar,
+  .github-calendar-container div::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
   }
   
-  .github-calendar-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
+  .github-calendar-container::-webkit-scrollbar-track,
+  .github-calendar-container *::-webkit-scrollbar-track,
+  .github-calendar-container svg::-webkit-scrollbar-track,
+  .github-calendar-container div::-webkit-scrollbar-track {
+    background: transparent !important;
   }
   
-  .github-calendar-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+  .github-calendar-container::-webkit-scrollbar-thumb,
+  .github-calendar-container *::-webkit-scrollbar-thumb,
+  .github-calendar-container svg::-webkit-scrollbar-thumb,
+  .github-calendar-container div::-webkit-scrollbar-thumb {
+    background: transparent !important;
   }
   
-  .github-calendar-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  .github-calendar-container::-webkit-scrollbar-track,
+  .github-calendar-container *::-webkit-scrollbar-track,
+  .github-calendar-container svg::-webkit-scrollbar-track,
+  .github-calendar-container div::-webkit-scrollbar-track {
+    display: none !important;
+  }
+  
+  .github-calendar-container::-webkit-scrollbar-thumb,
+  .github-calendar-container *::-webkit-scrollbar-thumb,
+  .github-calendar-container svg::-webkit-scrollbar-thumb,
+  .github-calendar-container div::-webkit-scrollbar-thumb {
+    display: none !important;
+  }
+  
+  /* Show scrollbar on hover for all elements */
+  .github-calendar-container:hover,
+  .github-calendar-container:hover *,
+  .github-calendar-container:hover svg,
+  .github-calendar-container:hover div {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgb(156 163 175) rgb(243 244 246) !important;
+  }
+  
+  .github-calendar-container:hover::-webkit-scrollbar,
+  .github-calendar-container:hover *::-webkit-scrollbar,
+  .github-calendar-container:hover svg::-webkit-scrollbar,
+  .github-calendar-container:hover div::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  
+  .github-calendar-container:hover::-webkit-scrollbar-track,
+  .github-calendar-container:hover *::-webkit-scrollbar-track,
+  .github-calendar-container:hover svg::-webkit-scrollbar-track,
+  .github-calendar-container:hover div::-webkit-scrollbar-track {
+    background: rgb(243 244 246) !important;
+    border-radius: 4px !important;
+  }
+  
+  .github-calendar-container:hover::-webkit-scrollbar-thumb,
+  .github-calendar-container:hover *::-webkit-scrollbar-thumb,
+  .github-calendar-container:hover svg::-webkit-scrollbar-thumb,
+  .github-calendar-container:hover div::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175) !important;
+    border-radius: 4px !important;
+  }
+  
+  .github-calendar-container:hover::-webkit-scrollbar-thumb:hover,
+  .github-calendar-container:hover *::-webkit-scrollbar-thumb:hover,
+  .github-calendar-container:hover svg::-webkit-scrollbar-thumb:hover,
+  .github-calendar-container:hover div::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128) !important;
   }
 
-  /* Remove scrollbar highlight after programmatic scrolling */
-  .github-calendar-container.scroll-complete::-webkit-scrollbar-thumb {
-    background: #888 !important;
-  }
-  
-  .github-calendar-container.scroll-complete {
-    scrollbar-color: #888 #f1f1f1 !important;
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .github-calendar-container:hover,
+    .github-calendar-container:hover *,
+    .github-calendar-container:hover svg,
+    .github-calendar-container:hover div {
+      scrollbar-color: rgb(75 85 99) rgb(31 41 55) !important;
+    }
+    
+    .github-calendar-container:hover::-webkit-scrollbar-track,
+    .github-calendar-container:hover *::-webkit-scrollbar-track,
+    .github-calendar-container:hover svg::-webkit-scrollbar-track,
+    .github-calendar-container:hover div::-webkit-scrollbar-track {
+      background: rgb(31 41 55) !important;
+    }
+    
+    .github-calendar-container:hover::-webkit-scrollbar-thumb,
+    .github-calendar-container:hover *::-webkit-scrollbar-thumb,
+    .github-calendar-container:hover svg::-webkit-scrollbar-thumb,
+    .github-calendar-container:hover div::-webkit-scrollbar-thumb {
+      background: rgb(75 85 99) !important;
+    }
+    
+    .github-calendar-container:hover::-webkit-scrollbar-thumb:hover,
+    .github-calendar-container:hover *::-webkit-scrollbar-thumb:hover,
+    .github-calendar-container:hover svg::-webkit-scrollbar-thumb:hover,
+    .github-calendar-container:hover div::-webkit-scrollbar-thumb:hover {
+      background: rgb(107 114 128) !important;
+    }
   }
 
   /* Smooth fade-in animation for calendar */

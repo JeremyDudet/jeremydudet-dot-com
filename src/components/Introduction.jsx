@@ -78,10 +78,10 @@ export function Introduction() {
             GitHub →
           </a>
           <a
-            href="https://docs.google.com/document/d/1-BTcUuFp3fuM-Wc6yLJQ_YTr7FUcUvF03gfCSZS8XCc/edit?usp=sharing"
+            href="https://x.com/jeremyfdudet"
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
-            Resume →
+            X →
           </a>
         </div>
       </Container>
