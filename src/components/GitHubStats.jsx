@@ -133,27 +133,24 @@ const GitHubStats = () => {
   }, [isDark, calendarLoaded]); // Re-run when theme changes or calendar loads
 
   return (
-    <div>
-      <Heading level={3}>github stats</Heading>
-      <div ref={calendarRef} className="github-calendar-container mt-4">
-        {showCalendar && (
-          <div className="calendar-fade-in">
-            <GitHubCalendar
-              username="JeremyDudet"
-              theme={isDark ? darkTheme : lightTheme}
-              hideColorLegend
-              style={{
-                width: '100%',
-                maxWidth: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                fontSize: '16px'
-              }}
-            />
-          </div>
-        )}
-      </div>
+    <div ref={calendarRef} className="github-calendar-container mt-4">
+      {showCalendar && (
+        <div className="calendar-fade-in">
+          <GitHubCalendar
+            username="JeremyDudet"
+            theme={isDark ? darkTheme : lightTheme}
+            hideColorLegend
+            style={{
+              width: '100%',
+              maxWidth: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              fontSize: '16px'
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
