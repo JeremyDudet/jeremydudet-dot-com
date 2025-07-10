@@ -145,9 +145,11 @@ const GitHubStats = () => {
               maxWidth: '100%',
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px',
-              fontSize: '16px'
+              gap: '2px',
+              fontSize: '14px',
+              marginBottom: '0px'
             }}
+            blockSize={8} // Makes contribution squares smaller
           />
         </div>
       )}
