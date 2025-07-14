@@ -81,13 +81,13 @@ export default function App() {
                     >
                       <Text className="!text-blue-600 dark:!text-blue-400 hover:underline">LinkedIn →</Text>
                     </a>
-                    <a
+                    {/* <a
                       href="https://x.com/jeremyfdudet"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <Text className="!text-blue-600 dark:!text-blue-400 hover:underline">X →</Text>
-                    </a>
+                    </a> */}
                   </div>
                 </div>
               </Container>
