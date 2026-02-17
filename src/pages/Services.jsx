@@ -313,6 +313,8 @@ export default function Services() {
                     id="email"
                     name="email"
                     required
+                    pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                    title="Please enter a valid email address"
                     value={formData.email}
                     onChange={(e) =>
                       setFormData((d) => ({ ...d, email: e.target.value }))
