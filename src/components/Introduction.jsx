@@ -1,6 +1,6 @@
 import { Container } from "@/components/Container";
-import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { Heading } from "@/components/ui/heading";
 
 export function Introduction() {
   return (
@@ -10,16 +10,18 @@ export function Introduction() {
       className="flex flex-col items-center"
     >
       <Container className="text-lg text-zinc-600 dark:text-zinc-400">
-        <Heading level={1}>jeremy dudet</Heading>
-        <Text>software developer</Text>
+        <Text>
+          Developer. I build AI-powered tools and help businesses do the same.
+        </Text>
+        <Text className="mt-4">Currently living in the Austin metro area.</Text>
 
         <div className="mt-8">
-          <Heading level={3}>work</Heading>
+          <Heading level={3}>Work</Heading>
           <ul className="mt-4 space-y-4">
             <li>
               <Text>Uber</Text>
               <Text>Integration Engineer </Text>
-              <Text>(jun '24 - present)</Text>
+              <Text>(jun '24 - dec '25)</Text>
               <Text>
                 Onboard and maintain integrations between UberEats and POS
                 systems.
@@ -46,7 +48,7 @@ export function Introduction() {
           </ul>
         </div>
         <div className="mt-8">
-          <Heading level={3}>projects</Heading>
+          <Heading level={3}>Projects</Heading>
           <ul className="mt-4 space-y-4">
             <li>
               <a
@@ -78,10 +80,10 @@ export function Introduction() {
             GitHub →
           </a>
           <a
-            href="https://x.com/jeremyfdudet"
+            href="https://docs.google.com/document/d/1-BTcUuFp3fuM-Wc6yLJQ_YTr7FUcUvF03gfCSZS8XCc/edit?usp=sharing"
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
-            X →
+            Resume →
           </a>
         </div>
       </Container>
