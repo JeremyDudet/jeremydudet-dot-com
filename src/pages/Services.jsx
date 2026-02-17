@@ -394,6 +394,7 @@ export default function Services() {
                     <option value="Under $500">Under $500</option>
                     <option value="$500–$2,000">$500–$2,000</option>
                     <option value="$2,000–$5,000">$2,000–$5,000</option>
+                    <option value="$5,000+">$5,000+</option>
                     <option value="Not sure yet">Not sure yet</option>
                   </select>
                 </div>
