@@ -268,17 +268,30 @@ export default function Services() {
           <div className="mt-10">
             {formState === 'sent' ? (
               <div className="space-y-4">
-                <Text className="text-green-600 dark:text-green-400">
-                  Sent. I'll get back to you within a day.
-                </Text>
-                <Text>Want to talk sooner? Book a call below.</Text>
-                <a
-                  href={`https://cal.com/jeremydudet?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button color="blue" className="mt-2">Book a Call</Button>
-                </a>
+                <div className="flex items-center gap-3">
+                  <svg className="h-8 w-8 text-green-500 dark:text-green-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M7.5 12.5L10.5 15.5L16.5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <div>
+                    <p className="text-base font-medium text-zinc-950 dark:text-white">
+                      Message sent!
+                    </p>
+                    <Text>
+                      Thanks for reaching out. I'll get in touch soon.
+                    </Text>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Text>Want to skip the wait?</Text>
+                  <a
+                    href={`https://cal.com/jeremydudet?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button color="blue">Book a Call Now</Button>
+                  </a>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
