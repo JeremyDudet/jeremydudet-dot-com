@@ -7,7 +7,7 @@ export default function Products() {
   return (
     <>
       <Helmet>
-        <title>Products — Jeremy Dudet</title>
+        <title>Products | Jeremy Dudet</title>
       </Helmet>
       <Container>
         <Heading level={1}>Products</Heading>

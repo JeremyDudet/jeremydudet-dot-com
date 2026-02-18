@@ -9,7 +9,7 @@ export function Introduction() {
       aria-label="Introduction"
       className="flex flex-col items-center"
     >
-      <Container className="text-lg text-zinc-600 dark:text-zinc-400">
+      <Container>
         <Text>
           Developer. I build AI-powered tools and help businesses do the same.
         </Text>
@@ -78,12 +78,6 @@ export function Introduction() {
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
             GitHub →
-          </a>
-          <a
-            href="https://docs.google.com/document/d/1-BTcUuFp3fuM-Wc6yLJQ_YTr7FUcUvF03gfCSZS8XCc/edit?usp=sharing"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            Resume →
           </a>
         </div>
       </Container>
