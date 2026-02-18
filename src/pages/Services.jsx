@@ -108,13 +108,10 @@ export default function Services() {
         {/* Header */}
         <section>
           <Heading level={1}>
-            I build AI tools and websites for restaurants, cafes, and F&amp;B businesses.
+            AI tools and websites for restaurants, cafes, and F&amp;B businesses.
           </Heading>
           <Text className="mt-4">
-            If you run a restaurant, cafe, or food &amp; beverage business and
-            need software that actually fits the way you work, I can help. I
-            specialize in AI-powered automation and clean, fast websites for
-            the food industry.
+            AI automation and fast websites for the food industry.
           </Text>
           <div className="mt-6">
             <Button
@@ -131,22 +128,15 @@ export default function Services() {
           <Heading level={2}>Who this is for</Heading>
           <div className="mt-6 space-y-6">
             <Text>
-              You run a restaurant, cafe, bakery, or food &amp; beverage
-              business and have manual processes that eat up hours every
-              week: inventory counts, vendor orders, recipe costing, report
-              generation. You know there's a better way, but off-the-shelf
-              software doesn't quite fit your operation.
+              You run an F&amp;B business with manual processes eating up
+              hours. Off-the-shelf software doesn't fit.
             </Text>
             <Text>
-              You need a website that looks professional and loads fast
-              (menus, hours, online ordering links) but you don't want to spend months
-              going back and forth with an agency. You want something simple,
-              clean, and done right.
+              You need a fast, professional website without months of
+              agency back-and-forth.
             </Text>
             <Text>
-              You have an idea for a tool or app that would make your
-              front-of-house or back-of-house team's life easier, but you
-              need someone technical to actually build it.
+              You have a tool idea but need someone technical to build it.
             </Text>
           </div>
         </section>
@@ -159,30 +149,24 @@ export default function Services() {
             <div>
               <Heading level={3}>AI Workflow Automation</Heading>
               <Text className="mt-2">
-                Custom AI tools that automate repetitive tasks in your
-                restaurant or cafe. Think voice-powered inventory counts,
-                automated sales reports, intelligent invoice processing, or
-                chatbots trained on your menu and operations data.
+                Voice-powered inventory, sales reports, invoice processing,
+                chatbots trained on your menu and ops data.
               </Text>
             </div>
 
             <div>
               <Heading level={3}>Landing Pages &amp; Marketing Sites</Heading>
               <Text className="mt-2">
-                Fast, responsive websites built with modern tools. Perfect for
-                restaurants, cafes, bakeries, and food &amp; beverage brands
-                that need a clean web presence (menus, location info, online
-                ordering) without the bloat.
+                Fast websites for restaurants, cafes, and F&amp;B brands.
+                Menus, location info, online ordering. No bloat.
               </Text>
             </div>
 
             <div>
               <Heading level={3}>Custom Dev Work</Heading>
               <Text className="mt-2">
-                Internal tools, dashboards, POS integrations, vendor management
-                systems. If you need your POS talking to your inventory app, or
-                a custom tool built from scratch for your operation, I can do
-                that.
+                Internal tools, dashboards, POS integrations, vendor management.
+                Whatever your operation needs.
               </Text>
             </div>
           </div>
@@ -220,8 +204,8 @@ export default function Services() {
                 <span className="font-medium text-zinc-950 dark:text-white">
                   1. We talk.
                 </span>{' '}
-                You tell me what you need. I ask questions to make sure I
-                understand the problem. No jargon, no upsells.
+
+                You tell me what you need. No jargon, no upsells.
               </Text>
             </li>
             <li>
@@ -229,8 +213,9 @@ export default function Services() {
                 <span className="font-medium text-zinc-950 dark:text-white">
                   2. I build it.
                 </span>{' '}
-                I work in short cycles and show you progress along the way. You
-                give feedback, I adjust. Simple.
+
+
+                Short cycles, regular updates. You give feedback, I adjust.
               </Text>
             </li>
             <li>
@@ -238,8 +223,8 @@ export default function Services() {
                 <span className="font-medium text-zinc-950 dark:text-white">
                   3. You use it.
                 </span>{' '}
-                I hand it off with everything you need to run it. If something
-                breaks, I fix it.
+
+                I hand it off ready to go. If something breaks, I fix it.
               </Text>
             </li>
           </ol>
@@ -249,18 +234,12 @@ export default function Services() {
         <section className="mt-16">
           <Heading level={2}>About me</Heading>
           <Text className="mt-4">
-            I'm a software developer who's spent the last few years building
-            tools at the intersection of AI and food &amp; beverage operations.
-            I've worked as an Integration Engineer at Uber, connecting UberEats
-            with restaurant POS systems, and before that I ran operations at a
-            cafe where I built the inventory management system from scratch.
+            Former Integration Engineer at Uber (UberEats + restaurant POS)
+            and cafe ops manager. Built the inventory system from scratch.
           </Text>
           <Text className="mt-4">
-            That experience showed me how much time restaurants and cafes waste
-            on tasks that software could handle, if the software was actually
-            built for them. So that's what I do now. I build Stockcount, a
-            voice-powered inventory app for F&amp;B, and I help other food
-            businesses get custom tools built too.
+            Now I build Stockcount, a voice-powered inventory app for F&amp;B,
+            and help food businesses get custom tools.
           </Text>
         </section>
 
@@ -268,8 +247,7 @@ export default function Services() {
         <section id="contact" className="mt-16 scroll-mt-8">
           <Heading level={2}>Get in touch</Heading>
           <Text className="mt-4">
-            Tell me a bit about your project. Once you send the form, you can
-            book a call.
+            Tell me about your project. Book a call after submitting.
           </Text>
 
           <div className="mt-10">
