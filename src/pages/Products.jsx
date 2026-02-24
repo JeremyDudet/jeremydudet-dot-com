@@ -18,7 +18,7 @@ export default function Products() {
             <div>
               <Heading level={3}>Stockcount</Heading>
               <Text className="mt-1">
-                Voice-powered inventory management for food &amp; beverage businesses.
+                Voice-powered inventory management for F&amp;B.
               </Text>
             </div>
             <span className="inline-flex items-center rounded-full bg-yellow-50 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
@@ -26,10 +26,9 @@ export default function Products() {
             </span>
           </div>
           <Text className="mt-4">
-            Stockcount lets you count inventory by speaking naturally instead of
-            typing into spreadsheets. It handles day-to-day managerial accounting
-            tasks like waste tracking and cost analysis. It's the tool I wish I had
-            when working in F&amp;B retail.
+            Count inventory by speaking instead of typing into spreadsheets.
+            Waste tracking, cost analysis, and day-to-day managerial accounting
+            for F&amp;B.
           </Text>
           <div className="mt-4">
             <a

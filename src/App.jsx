@@ -4,6 +4,7 @@ import { PageNav } from '@/components/PageNav'
 import Home from '@/pages/Home'
 import Services from '@/pages/Services'
 import Products from '@/pages/Products'
+import Writing from '@/pages/Writing'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/writing" element={<Writing />} />
               </Routes>
             </div>
           </div>

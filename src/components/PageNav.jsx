@@ -5,6 +5,7 @@ const links = [
   { to: '/', label: 'Home' },
   { to: '/services', label: 'Services' },
   { to: '/products', label: 'Products' },
+  { to: '/writing', label: 'Writing' },
 ]
 
 function Annotation() {
