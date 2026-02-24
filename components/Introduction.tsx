@@ -1,0 +1,86 @@
+import { Container } from '@/components/Container'
+import { Text } from '@/components/ui/text'
+import { Heading } from '@/components/ui/heading'
+
+export function Introduction() {
+  return (
+    <section
+      id="introduction"
+      aria-label="Introduction"
+      className="flex flex-col items-center"
+    >
+      <Container>
+        <Text>
+          Developer. I build AI-powered tools and help businesses do the same.
+        </Text>
+        <Text className="mt-4">Currently living in the Austin metro area.</Text>
+
+        <div className="mt-8">
+          <Heading level={3}>Work</Heading>
+          <ul className="mt-4 space-y-4">
+            <li>
+              <Text>Uber</Text>
+              <Text>Integration Engineer </Text>
+              <Text>(jun &apos;24 - dec &apos;25)</Text>
+              <Text>
+                Onboard and maintain integrations between UberEats and POS
+                systems.
+              </Text>
+            </li>
+            <li>
+              <Text>Konditorei Cafe</Text>
+              <Text>IT guy | Operations Manager</Text>
+              <Text>(apr &apos;23 - jun &apos;24)</Text>
+              <Text>
+                Built a full-stack inventory management system, reducing food
+                waste and optimizing stock tracking.
+              </Text>
+            </li>
+            <li>
+              <Text>Zola + BarZola</Text>
+              <Text>IT guy | Staff Member</Text>
+              <Text>(dec &apos;21 - may &apos;23)</Text>
+              <Text>
+                Developed an internal web application for restaurant staff,
+                integrating Toast POS systems via APIs.
+              </Text>
+            </li>
+          </ul>
+        </div>
+        <div className="mt-8">
+          <Heading level={3}>Projects</Heading>
+          <ul className="mt-4 space-y-4">
+            <li>
+              <a
+                href="https://stockcount.io"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                <Text>stockcount.io</Text>
+              </a>
+              <Text>
+                The tool I wish I had when working in F&amp;B retail. A voice
+                (speech-to-crud) inventory management app for easy inventory
+                counting and for automating day-to-day managerial accounting
+                tasks.
+              </Text>
+            </li>
+          </ul>
+        </div>
+        <div className="text-sm mt-8 flex flex-col md:flex-row gap-4">
+          <a
+            href="https://www.linkedin.com/in/jeremydudet/"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            LinkedIn &rarr;
+          </a>
+          <a
+            href="https://github.com/JeremyDudet"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            GitHub &rarr;
+          </a>
+        </div>
+      </Container>
+    </section>
+  )
+}

@@ -2,40 +2,31 @@
   "name": "jeremydudet-dot-com",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@vercel/analytics": "^1.4.1",
     "autoprefixer": "^10.4.20",
     "clsx": "^2.1.1",
+    "next": "^15.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-github-calendar": "^4.5.9",
-    "react-helmet-async": "^2.0.5",
-    "react-router-dom": "^7.0.1",
     "react-tweet": "^3.3.0",
     "tailwindcss": "^3.4.15"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
-    "@rollup/rollup-linux-x64-gnu": "4.6.1",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^9.15.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.14",
-    "globals": "^15.12.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "postcss": "^8.4.49",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
-    "rollup": "^4.6.1",
     "sharp": "0.33.1",
-    "vite": "^4.5.1"
+    "typescript": "^5.7.0"
   }
 }
