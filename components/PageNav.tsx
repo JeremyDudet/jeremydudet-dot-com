@@ -8,7 +8,6 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services' },
   { href: '/products', label: 'Products' },
-  { href: '/writing', label: 'Writing' },
 ]
 
 function Annotation() {
