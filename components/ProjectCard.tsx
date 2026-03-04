@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 function useIsDesktop() {
   const [desktop, setDesktop] = useState(false)
@@ -20,20 +21,29 @@ export function ProjectCard({
   tilt = -3,
   offset = 0,
   desktopOffset = 0,
+  desktopImage,
+  mobileImage,
 }: {
   title: string
   url: string
   tilt?: number
   offset?: number
   desktopOffset?: number
+  desktopImage?: string
+  mobileImage?: string
 }) {
   const isDesktop = useIsDesktop()
   const cardWidth = isDesktop ? 360 : 220
   const cardRatio = isDesktop ? '7 / 5' : '5 / 7'
+  const cardOffset = isDesktop ? desktopOffset : offset
+  const imageSrc = isDesktop ? desktopImage : mobileImage
+
+  const useImage = !!imageSrc
+
+  // iframe fallback dimensions
   const iframeW = isDesktop ? 1280 : 430
   const iframeH = isDesktop ? 900 : 900
   const iframeScale = isDesktop ? 0.281 : 0.512
-  const cardOffset = isDesktop ? desktopOffset : offset
 
   return (
     <a
@@ -56,19 +66,29 @@ export function ProjectCard({
       }}
     >
       <div className="relative w-full h-full overflow-hidden bg-white dark:bg-zinc-800">
-        <iframe
-          src={url}
-          title={title}
-          scrolling="no"
-          className="pointer-events-none absolute top-0 left-0 origin-top-left"
-          style={{
-            width: iframeW,
-            height: iframeH,
-            transform: `scale(${iframeScale})`,
-          }}
-          tabIndex={-1}
-          loading="lazy"
-        />
+        {useImage ? (
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            className="object-cover object-top"
+            sizes={`${cardWidth}px`}
+          />
+        ) : (
+          <iframe
+            src={url}
+            title={title}
+            scrolling="no"
+            className="pointer-events-none absolute top-0 left-0 origin-top-left"
+            style={{
+              width: iframeW,
+              height: iframeH,
+              transform: `scale(${iframeScale})`,
+            }}
+            tabIndex={-1}
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
           <span className="text-sm font-medium text-white">{title}</span>
         </div>

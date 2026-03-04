@@ -177,6 +177,8 @@ function ExampleWork() {
         tilt={3}
         offset={200}
         desktopOffset={260}
+        desktopImage="/images/stockcount-desktop.jpg"
+        mobileImage="/images/stockcount-mobile.jpg"
       />
     </div>
   )
