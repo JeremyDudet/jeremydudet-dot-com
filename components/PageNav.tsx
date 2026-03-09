@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 const links = [
   { href: '/', label: 'Home' },
   { href: '/services', label: 'Services' },
-  { href: '/products', label: 'Products' },
+  { href: '/products', label: 'Projects' },
 ]
 
 function Annotation() {

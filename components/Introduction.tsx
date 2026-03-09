@@ -1,6 +1,8 @@
-import { Container } from '@/components/Container'
-import { Text } from '@/components/ui/text'
-import { Heading } from '@/components/ui/heading'
+import { Container } from "@/components/Container";
+import { Text } from "@/components/ui/text";
+import { Heading } from "@/components/ui/heading";
+import { GitHubStats } from "@/components/GitHubStats";
+import { StockcountProject } from "@/components/StockcountProject";
 
 export function Introduction() {
   return (
@@ -15,7 +17,7 @@ export function Introduction() {
         </Text>
         <Text className="mt-4">Currently living in the Austin metro area.</Text>
 
-        <div className="mt-8">
+        <div className="mt-16">
           <Heading level={3}>Work</Heading>
           <ul className="mt-4 space-y-4">
             <li>
@@ -47,26 +49,22 @@ export function Introduction() {
             </li>
           </ul>
         </div>
-        <div className="mt-8">
-          <Heading level={3}>Projects</Heading>
-          <ul className="mt-4 space-y-4">
-            <li>
-              <a
-                href="https://stockcount.io"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                <Text>stockcount.io</Text>
-              </a>
-              <Text>
-                The tool I wish I had when working in F&amp;B retail. A voice
-                (speech-to-crud) inventory management app for easy inventory
-                counting and for automating day-to-day managerial accounting
-                tasks.
-              </Text>
-            </li>
-          </ul>
+        <div className="mt-16">
+          <Heading level={2}>Projects</Heading>
+          <div className="mt-6">
+            <StockcountProject />
+          </div>
         </div>
-        <div className="text-sm mt-8 flex flex-col md:flex-row gap-4">
+        <div className="mt-16">
+          <Heading level={2}>Activity</Heading>
+          <div className="mt-4">
+            <GitHubStats />
+          </div>
+        </div>
+        <div className="mt-16">
+          <Heading level={2}>Links</Heading>
+        </div>
+        <div className="text-md mt-4 flex gap-8">
           <a
             href="https://www.linkedin.com/in/jeremydudet/"
             className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -79,8 +77,14 @@ export function Introduction() {
           >
             GitHub &rarr;
           </a>
+          <a
+            href="https://x.com/jeremyfdudet"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            X &rarr;
+          </a>
         </div>
       </Container>
     </section>
-  )
+  );
 }

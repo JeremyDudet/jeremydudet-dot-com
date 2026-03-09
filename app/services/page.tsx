@@ -1,27 +1,26 @@
-import type { Metadata } from 'next'
-import { Container } from '@/components/Container'
-import { Heading } from '@/components/ui/heading'
-import { Text } from '@/components/ui/text'
-import { ContactForm } from '@/components/ContactForm'
-import { ProjectCard } from '@/components/ProjectCard'
-import { JsonLd } from '@/components/JsonLd'
-import { serviceJsonLd } from '@/lib/structured-data'
-import { SITE } from '@/lib/metadata'
+import type { Metadata } from "next";
+import { Container } from "@/components/Container";
+import { Subheading, Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { ContactForm } from "@/components/ContactForm";
+import { ProjectCard } from "@/components/ProjectCard";
+import { JsonLd } from "@/components/JsonLd";
+import { serviceJsonLd } from "@/lib/structured-data";
+import { SITE } from "@/lib/metadata";
 
 export const metadata: Metadata = {
-  title: 'Services for Restaurants & F&B',
+  title: "Services for Restaurants & F&B",
   description:
-    'AI automation and fast websites for the food industry. Custom tools, landing pages, and integrations for restaurants, cafes, and F&B businesses.',
+    "AI automation and fast websites for the food industry. Custom tools, landing pages, and integrations for restaurants, cafes, and F&B businesses.",
   openGraph: {
-    title: 'Services for Restaurants & F&B | Jeremy Dudet',
-    description:
-      'AI automation and fast websites for the food industry.',
+    title: "Services for Restaurants & F&B | Jeremy Dudet",
+    description: "AI automation and fast websites for the food industry.",
     url: `${SITE.url}/services`,
   },
   alternates: {
     canonical: `${SITE.url}/services`,
   },
-}
+};
 
 export default function Services() {
   return (
@@ -29,15 +28,11 @@ export default function Services() {
       <JsonLd data={serviceJsonLd()} />
       <Container>
         {/* Header */}
-        <section>
+        <section className="flex align-middle flex-wrap gap-4">
           <Heading level={1}>
-            AI tools and websites for restaurants, cafes, and F&amp;B
-            businesses.
+            If you need custom automations or websites:
           </Heading>
-          <Text className="mt-4">
-            AI automation and fast websites for the food industry.
-          </Text>
-          <div className="mt-6">
+          <div>
             <a
               href="#contact"
               className="inline-flex justify-center rounded-md py-1 px-4 text-base font-semibold tracking-tight shadow-sm focus:outline-none bg-zinc-800 text-white hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-800 active:bg-zinc-900 active:text-white/80 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white dark:active:bg-zinc-200"
@@ -52,11 +47,12 @@ export default function Services() {
           <Heading level={2}>Who this is for</Heading>
           <div className="mt-6 space-y-6">
             <Text>
-              You run an F&amp;B business with manual processes eating up hours.
-              Off-the-shelf software doesn&apos;t fit.
+              You run an small or medium sized business with manual processes
+              eating up hours, and the off-the-shelf software options you have
+              available don&apos;t fit.
             </Text>
             <Text>
-              You need a fast, professional website without months of agency
+              You need a fast, and professional solution without months of
               back-and-forth.
             </Text>
             <Text>
@@ -71,7 +67,7 @@ export default function Services() {
 
           <div className="mt-8 space-y-10">
             <div>
-              <Heading level={3}>AI Workflow Automation</Heading>
+              <Subheading level={3}>Workflow Automation</Subheading>
               <Text className="mt-2">
                 Voice-powered inventory, sales reports, invoice processing,
                 chatbots trained on your menu and ops data.
@@ -79,7 +75,9 @@ export default function Services() {
             </div>
 
             <div>
-              <Heading level={3}>Landing Pages &amp; Marketing Sites</Heading>
+              <Subheading level={3}>
+                Landing Pages &amp; Marketing Sites
+              </Subheading>
               <Text className="mt-2">
                 Fast websites for restaurants, cafes, and F&amp;B brands. Menus,
                 location info, online ordering. No bloat.
@@ -87,7 +85,7 @@ export default function Services() {
             </div>
 
             <div>
-              <Heading level={3}>Custom Dev Work</Heading>
+              <Subheading level={3}>General Custom Dev Work</Subheading>
               <Text className="mt-2">
                 Internal tools, dashboards, POS integrations, vendor management.
                 Whatever your operation needs.
@@ -99,18 +97,72 @@ export default function Services() {
         {/* Example Work */}
         <section className="mt-16">
           <Heading level={2}>Example work</Heading>
-          <ExampleWork />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 mt-6">
+            <div className="flex-1 min-w-0">
+              <Heading level={3}>Stockcount</Heading>
+              <Text className="mt-2">
+                Voice-first inventory management for restaurants. Count stock by
+                speaking, track food costs in real time, and cut hours of manual
+                spreadsheet work down to minutes.
+              </Text>
+              <div className="mt-3">
+                <a
+                  href="https://stockcount.io"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  stockcount.io &rarr;
+                </a>
+              </div>
+            </div>
+            <div className="relative shrink-0 sm:w-52" style={{ height: 280 }}>
+              <ProjectCard
+                title="Stockcount"
+                url="https://stockcount.io"
+                tilt={3}
+                offset={0}
+                desktopOffset={0}
+                desktopImage="/images/stockcount-desktop.jpg"
+                mobileImage="/images/stockcount-mobile.jpg"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 mt-10">
+            <div className="flex-1 min-w-0">
+              <Heading level={3}>Konditorei Cafe</Heading>
+              <Text className="mt-2">
+                A fast, clean landing page for a local European-style cafe.
+                Menu, location, hours, and online ordering.
+              </Text>
+              <div className="mt-3">
+                <a
+                  href="https://konditoreicafe-com-jdudetgmailcoms-projects.vercel.app/"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  konditoreicafe.com &rarr;
+                </a>
+              </div>
+            </div>
+            <div className="relative shrink-0 sm:w-52" style={{ height: 280 }}>
+              <ProjectCard
+                title="Konditorei Cafe"
+                url="https://konditoreicafe-com-jdudetgmailcoms-projects.vercel.app/"
+                tilt={3}
+                offset={0}
+                desktopOffset={0}
+              />
+            </div>
+          </div>
         </section>
 
         {/* How It Works */}
         <section className="mt-16">
-          <Heading level={2}>How it works</Heading>
+          <Heading level={2}>How this process works:</Heading>
           <ol className="mt-6 space-y-6">
             <li>
               <Text>
                 <span className="font-medium text-zinc-950 dark:text-white">
                   1. We talk.
-                </span>{' '}
+                </span>{" "}
                 You tell me what you need. No jargon, no upsells.
               </Text>
             </li>
@@ -118,7 +170,7 @@ export default function Services() {
               <Text>
                 <span className="font-medium text-zinc-950 dark:text-white">
                   2. I build it.
-                </span>{' '}
+                </span>{" "}
                 Short cycles, regular updates. You give feedback, I adjust.
               </Text>
             </li>
@@ -126,7 +178,7 @@ export default function Services() {
               <Text>
                 <span className="font-medium text-zinc-950 dark:text-white">
                   3. You use it.
-                </span>{' '}
+                </span>{" "}
                 I hand it off ready to go. If something breaks, I fix it.
               </Text>
             </li>
@@ -158,28 +210,5 @@ export default function Services() {
         </section>
       </Container>
     </>
-  )
-}
-
-function ExampleWork() {
-  return (
-    <div className="relative mt-6" style={{ height: 340 }}>
-      <ProjectCard
-        title="Konditorei Cafe"
-        url="https://konditoreicafe-com-jdudetgmailcoms-projects.vercel.app/"
-        tilt={-4}
-        offset={0}
-        desktopOffset={0}
-      />
-      <ProjectCard
-        title="Stockcount"
-        url="https://stockcount.io"
-        tilt={3}
-        offset={200}
-        desktopOffset={260}
-        desktopImage="/images/stockcount-desktop.jpg"
-        mobileImage="/images/stockcount-mobile.jpg"
-      />
-    </div>
-  )
+  );
 }

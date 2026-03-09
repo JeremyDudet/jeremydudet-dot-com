@@ -1,19 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-
-function useIsDesktop() {
-  const [desktop, setDesktop] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    setDesktop(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setDesktop(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-  return desktop
-}
 
 export function ProjectCard({
   title,
@@ -23,6 +11,7 @@ export function ProjectCard({
   desktopOffset = 0,
   desktopImage,
   mobileImage,
+  wideBreakpoint = 300,
 }: {
   title: string
   url: string
@@ -31,29 +20,62 @@ export function ProjectCard({
   desktopOffset?: number
   desktopImage?: string
   mobileImage?: string
+  wideBreakpoint?: number
 }) {
-  const isDesktop = useIsDesktop()
-  const cardWidth = isDesktop ? 360 : 220
-  const cardRatio = isDesktop ? '7 / 5' : '5 / 7'
-  const cardOffset = isDesktop ? desktopOffset : offset
-  const imageSrc = isDesktop ? desktopImage : mobileImage
+  const containerRef = useRef<HTMLAnchorElement>(null)
+  const [isWide, setIsWide] = useState(false)
+  const [cardWidth, setCardWidth] = useState(0)
+
+  useEffect(() => {
+    const el = containerRef.current?.parentElement
+    if (!el) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setIsWide(entry.contentRect.width >= wideBreakpoint)
+      }
+    })
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [wideBreakpoint])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCardWidth(entry.contentRect.width)
+      }
+    })
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const cardRatio = isWide ? '7 / 5' : '5 / 7'
+  const cardOffset = isWide ? desktopOffset : offset
+  const imageSrc = isWide ? desktopImage : mobileImage
 
   const useImage = !!imageSrc
 
-  // iframe fallback dimensions
-  const iframeW = isDesktop ? 1280 : 430
-  const iframeH = isDesktop ? 900 : 900
-  const iframeScale = isDesktop ? 0.281 : 0.512
+  // iframe dimensions and dynamic scale based on actual card width
+  const iframeW = isWide ? 1280 : 430
+  const iframeH = 900
+  const iframeScale = cardWidth > 0 ? cardWidth / iframeW : 0
 
   return (
     <a
+      ref={containerRef}
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group absolute rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-md hover:shadow-xl hover:z-30 transition-all duration-300"
+      className="group absolute inset-0 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-md hover:shadow-xl hover:z-30 transition-all duration-300"
       style={{
-        width: cardWidth,
         aspectRatio: cardRatio,
+        width: '100%',
+        maxHeight: '100%',
         transform: `rotate(${tilt}deg) translateY(0px)`,
         left: cardOffset,
         background: 'white',
@@ -72,7 +94,7 @@ export function ProjectCard({
             alt={title}
             fill
             className="object-cover object-top"
-            sizes={`${cardWidth}px`}
+            sizes="300px"
           />
         ) : (
           <iframe
