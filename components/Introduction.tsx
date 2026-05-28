@@ -74,10 +74,10 @@ export function Introduction() {
           </header>
 
           {/* Main content */}
-          <div>
-            <div className="mt-16 lg:mt-0">
+          <div className="mt-24 lg:mt-0">
+            <div>
               <Heading level={2}>Work</Heading>
-              <ul className="mt-6 space-y-8">
+              <ul className="mt-6 space-y-10">
                 {work.map(({ title, role, dates, description }) => (
                   <li key={title}>
                     <div className="flex items-baseline justify-between gap-4">
@@ -91,30 +91,30 @@ export function Introduction() {
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
                       {role}
                     </p>
-                    <Text className="mt-2">{description}</Text>
+                    <Text className="mt-3">{description}</Text>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="mt-16">
+            <div className="mt-24">
               <Heading level={2}>Projects</Heading>
               <div className="mt-6">
                 <StockcountProject />
               </div>
             </div>
 
-            <div className="mt-16">
+            <div className="mt-24">
               <Heading level={2}>Activity</Heading>
-              <div className="mt-4">
+              <div className="mt-6">
                 <GitHubStats />
               </div>
             </div>
 
             {/* Links render inline at the bottom on mobile only */}
-            <div className="mt-16 lg:hidden">
+            <div className="mt-24 lg:hidden">
               <Heading level={2}>Links</Heading>
-              <div className="text-md mt-4 flex gap-8">
+              <div className="text-md mt-6 flex gap-8">
                 {socials.map(({ href, label }) => (
                   <a
                     key={label}
