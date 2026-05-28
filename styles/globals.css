@@ -9,6 +9,16 @@
 }
 
 @layer components {
+  .scroll-pane {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-pane::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
   .github-calendar-container {
     overflow-x: auto;
     scroll-behavior: smooth;

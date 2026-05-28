@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter, Caveat } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { PageNav } from '@/components/PageNav'
+import ScrollRail from '@/components/ScrollRail'
+import ScrollEdgeFade from '@/components/ScrollEdgeFade'
 import { SITE } from '@/lib/metadata'
 import '@/styles/globals.css'
 
@@ -54,15 +55,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${caveat.variable}`}>
-      <body className="font-sans text-zinc-950 antialiased bg-zinc-100 dark:text-white dark:bg-zinc-950">
-        <main className="flex flex-1 flex-col pb-2 min-w-0 pt-2 pr-2 pl-2 min-h-screen h-full">
-          <div className="grow p-6 rounded-2xl bg-white ring-1 shadow-xs ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 h-full min-h-full">
+      <body className="font-sans text-zinc-950 antialiased bg-zinc-100 dark:text-white dark:bg-zinc-950 h-dvh overflow-hidden">
+        <main className="flex flex-col min-w-0 p-2 h-dvh">
+          <div
+            id="main-scroll"
+            className="scroll-pane grow min-h-0 overflow-y-auto p-6 rounded-2xl bg-white ring-1 shadow-xs ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10"
+          >
             <div className="mx-auto max-w-6xl my-8">
-              <PageNav />
               {children}
             </div>
           </div>
         </main>
+        <ScrollEdgeFade edge="top" />
+        <ScrollEdgeFade edge="bottom" />
+        <ScrollRail targetId="main-scroll" />
         <Analytics />
       </body>
     </html>
