@@ -3,11 +3,27 @@ import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
 import { GitHubStats } from "@/components/GitHubStats";
 import { StockcountProject } from "@/components/StockcountProject";
+import { GitHubIcon, LinkedInIcon, XIcon } from "@/components/SocialIcons";
 
 const socials = [
-  { href: "https://www.linkedin.com/in/jeremydudet/", label: "LinkedIn" },
-  { href: "https://github.com/JeremyDudet", label: "GitHub" },
-  { href: "https://x.com/jeremyfdudet", label: "X" },
+  {
+    href: "https://www.linkedin.com/in/jeremydudet/",
+    label: "LinkedIn",
+    icon: LinkedInIcon,
+    color: "text-[#0A66C2] dark:text-[#70B5F9]",
+  },
+  {
+    href: "https://github.com/JeremyDudet",
+    label: "GitHub",
+    icon: GitHubIcon,
+    color: "text-[#181717] dark:text-white",
+  },
+  {
+    href: "https://x.com/jeremyfdudet",
+    label: "X",
+    icon: XIcon,
+    color: "text-black dark:text-white",
+  },
 ];
 
 const work = [
@@ -56,18 +72,19 @@ export function Introduction() {
               area.
             </Text>
 
-            {/* Links live in the sidebar on large screens */}
             <nav
               aria-label="Social links"
-              className="mt-8 hidden flex-col gap-3 text-sm lg:flex"
+              className="mt-6 flex items-center gap-5 lg:mt-8"
             >
-              {socials.map(({ href, label }) => (
+              {socials.map(({ href, label, icon: Icon, color }) => (
                 <a
                   key={label}
                   href={href}
-                  className="w-fit text-blue-600 transition-colors hover:underline dark:text-blue-400"
+                  aria-label={label}
+                  title={label}
+                  className={`${color} transition-opacity hover:opacity-70`}
                 >
-                  {label} &rarr;
+                  <Icon className="size-5" />
                 </a>
               ))}
             </nav>
@@ -108,22 +125,6 @@ export function Introduction() {
               <Heading level={2}>Activity</Heading>
               <div className="mt-6">
                 <GitHubStats />
-              </div>
-            </div>
-
-            {/* Links render inline at the bottom on mobile only */}
-            <div className="mt-24 lg:hidden">
-              <Heading level={2}>Links</Heading>
-              <div className="text-md mt-6 flex gap-8">
-                {socials.map(({ href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    className="text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    {label} &rarr;
-                  </a>
-                ))}
               </div>
             </div>
           </div>
