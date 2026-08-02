@@ -4,6 +4,10 @@ import { Heading } from "@/components/ui/heading";
 import { GitHubStats } from "@/components/GitHubStats";
 import { StockcountProject } from "@/components/StockcountProject";
 import { GitHubIcon, LinkedInIcon, XIcon } from "@/components/SocialIcons";
+import { PostCard } from "@/components/PostCard";
+import { SubscribeForm } from "@/components/SubscribeForm";
+import { recentEntries, subscriberCount } from "@/lib/db/queries";
+import { SAMPLE_DB_ENTRIES, orSamples } from "@/lib/samples";
 
 const socials = [
   {
@@ -57,7 +61,19 @@ const work = [
   },
 ];
 
-export function Introduction() {
+export async function Introduction() {
+  // Never let a database blip take down the home page — the rest of the page
+  // is static and should still render.
+  const posts = orSamples(
+    await recentEntries(2).catch(() => []),
+    SAMPLE_DB_ENTRIES.slice(0, 2),
+  );
+
+  // levelsio can say "join 15,889 subscribers" because that number persuades.
+  // A real one below ~25 does the opposite, so the count only appears once it
+  // is doing the job it is there to do.
+  const subscribers = await subscriberCount().catch(() => 0);
+
   return (
     <section id="introduction" aria-label="Introduction">
       <Container size="md">
@@ -71,6 +87,15 @@ export function Introduction() {
               Application developer. Currently living in the Austin, TX metro
               area.
             </Text>
+
+            <p className="mt-4">
+              <a
+                href="/blog"
+                className="text-base/6 text-zinc-700 underline underline-offset-4 hover:text-zinc-950 sm:text-sm/6 dark:text-zinc-300 dark:hover:text-white"
+              >
+                Writing
+              </a>
+            </p>
 
             <nav
               aria-label="Social links"
@@ -88,6 +113,31 @@ export function Introduction() {
                 </a>
               ))}
             </nav>
+
+            <div className="mt-8">
+              <Text>Hi, I&apos;m Jeremy and you&apos;ve found my blog.</Text>
+              <Text className="mt-3">
+                I&apos;m building{' '}
+                <a
+                  href="https://stockcount.io"
+                  className="underline underline-offset-4 hover:text-zinc-950 dark:hover:text-white"
+                >
+                  Stockcount
+                </a>
+                , inventory software for restaurants and cafes. I worked in
+                them first.
+              </Text>
+              <Text className="mt-3">
+                I share my thoughts and the journey here.
+                {subscribers >= 25 && (
+                  <> Join {subscribers.toLocaleString()} subscribers.</>
+                )}
+              </Text>
+
+              <div className="mt-5">
+                <SubscribeForm showBlurb={false} compact />
+              </div>
+            </div>
           </header>
 
           {/* Main content */}
@@ -119,6 +169,35 @@ export function Introduction() {
               <div className="mt-6">
                 <StockcountProject />
               </div>
+            </div>
+
+            <div className="mt-24">
+              <div className="flex items-baseline justify-between gap-4">
+                <Heading level={2}>Writing</Heading>
+                <a
+                  href="/blog"
+                  className="shrink-0 text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                >
+                  All posts →
+                </a>
+              </div>
+              {posts.length === 0 ? (
+                <Text className="mt-6">Nothing published yet.</Text>
+              ) : (
+                <div className="mt-6 space-y-4">
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.slug}
+                      postId={post.postId}
+                      body={post.body}
+                      postedAt={post.postedAt}
+                      media={post.media}
+                      href={`/blog/${post.slug}`}
+                      clamp
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-24">
