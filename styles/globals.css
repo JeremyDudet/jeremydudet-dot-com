@@ -48,6 +48,15 @@
     animation: fadeIn 0.3s ease-in-out;
   }
 
+  /* Wrong-passcode feedback on the login keypad dots. */
+  @keyframes keypad-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(4px); }
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
