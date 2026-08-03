@@ -99,6 +99,7 @@ const EntryVerdict = z.object({
   score: z.number(),
   suggested: z.string(),
   reason: z.string(),
+  question: z.string(),
 })
 
 export type EntryVerdict = z.infer<typeof EntryVerdict>
@@ -112,7 +113,9 @@ repeatedly find real problems, launch businesses, and generate cash flow
 without depending on a job or any single product. Stockcount — inventory
 software for restaurants and cafes, born from his years working in them — is
 the current vehicle, not the identity. This journal documents the whole
-journey: the learning, the launches, the misses.
+journey: the learning, the launches, the misses. That is the North Star every
+verdict serves: the question is never "is this good content?" but "does
+sharing this advance the public record of that journey?"
 
 You are his editor, not a growth hacker. Your editorial stance comes from
 Austin Kleon's Show Your Work:
@@ -168,6 +171,12 @@ suggested: only meaningful for "post". Extract and tighten the strongest
 score: 0-10, how ready this is to be public as-is.
 reason: one sentence, direct, addressed to Jeremy. For "develop", name the
   specific missing piece. This is the field he reads to tune this rubric.
+question: for "develop" only, and only when the missing piece is something
+  only Jeremy can supply — a specific story, number, decision, or outcome he
+  has not written down. Ask exactly ONE concrete question that would unblock
+  the idea; he will answer it as another voice or text dump. If the idea just
+  needs time to ripen rather than information, return an empty string. For
+  "post" and "private", always an empty string.
 `.trim()
 
 /**
@@ -188,10 +197,23 @@ In "suggested", write it out as he would have typed it: real sentences,
 paragraph breaks where he changed subject, filler removed, wording preserved.
 `.trim()
 
-/** Judge #1 — the journal gate. Decides whether a raw thought ever leaves. */
+/** Appended when a root has hit its answer cap — the conversation is over. */
+const NO_MORE_QUESTIONS = `
+You have already asked enough follow-up questions about this idea. Decide
+"post" or "private", or "develop" without a question — return an empty
+question regardless.
+`.trim()
+
+/** Judge #1 — the journal gate. Decides whether a raw thought ever leaves.
+ *  `feedback` is distilled guidance from past rejections (lib/feedback.ts);
+ *  this file stays db-free, so callers fetch the lines. */
 export async function judgeEntry(
   body: string,
-  opts: { spoken?: boolean } = {},
+  opts: {
+    spoken?: boolean
+    feedback?: string[]
+    noMoreQuestions?: boolean
+  } = {},
 ): Promise<EntryVerdict> {
   const completion = await xai().chat.completions.parse({
     model: MODEL,
@@ -199,6 +221,12 @@ export async function judgeEntry(
       { role: 'system', content: ENTRY_RUBRIC },
       ...(opts.spoken
         ? [{ role: 'system' as const, content: SPOKEN_NOTE }]
+        : []),
+      ...(opts.feedback?.length
+        ? [{ role: 'system' as const, content: feedbackNote(opts.feedback) }]
+        : []),
+      ...(opts.noMoreQuestions
+        ? [{ role: 'system' as const, content: NO_MORE_QUESTIONS }]
         : []),
       { role: 'user', content: body },
     ],
@@ -212,7 +240,27 @@ export async function judgeEntry(
     ...parsed,
     score: clamp(parsed.score),
     suggested: parsed.suggested?.trim() || body,
+    // Belt and braces: the cap is enforced in code, whatever the model says.
+    question:
+      parsed.verdict === 'develop' && !opts.noMoreQuestions
+        ? parsed.question.trim()
+        : '',
   }
+}
+
+/**
+ * Precedence is explicit: the rubric defines the standard, feedback tunes
+ * taste within it. Without that line, models treat recently appended text as
+ * stronger than the system rubric and ten negatives would swing everything
+ * to private.
+ */
+export function feedbackNote(lines: string[]): string {
+  return [
+    'Recent feedback from Jeremy on past proposals. The rubric defines the',
+    'standard; this feedback tunes taste within it — where they conflict, the',
+    'rubric wins. Treat it as guidance, not hard rules:',
+    ...lines.map((l) => `- ${l}`),
+  ].join('\n')
 }
 
 const LinkedInVerdict = z.object({

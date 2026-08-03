@@ -22,10 +22,12 @@ export async function setSetting(key: string, value: unknown) {
 }
 
 /**
- * Template is the deliberate default: the near-term priority is the user
- * owning voice and tone, and a template with gaps cannot be rubber-stamped.
+ * Draft is the default: the daily loop is refine-until-it-sounds-like-you,
+ * then publish — a draft supports that; a template forces a detour through
+ * the composer. Template mode remains a toggle for when owning every word
+ * matters more than speed.
  */
 export async function sharingMode(): Promise<SharingMode> {
   const mode = await getSetting<SharingMode>('sharing_mode')
-  return mode === 'draft' ? 'draft' : 'template'
+  return mode === 'template' ? 'template' : 'draft'
 }

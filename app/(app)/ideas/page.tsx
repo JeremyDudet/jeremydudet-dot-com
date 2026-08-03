@@ -3,6 +3,8 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import { assertAdmin } from '@/lib/admin-auth'
 import { allThreads, entryCounts } from '@/lib/db/zettel'
+import { ideasReview } from '@/lib/db/review'
+import { ProposalCard } from '../admin/ProposalCard'
 import type { Thread, ThreadState } from '@/lib/db/schema'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +32,11 @@ const STATE_STYLE: Record<ThreadState, string> = {
  */
 export default async function IdeasPage() {
   await assertAdmin()
-  const [threads, counts] = await Promise.all([allThreads(), entryCounts()])
+  const [threads, counts, { suggestions, ripe }] = await Promise.all([
+    allThreads(),
+    entryCounts(),
+    ideasReview().catch(() => ({ suggestions: [], ripe: [] })),
+  ])
 
   const structure = threads.filter((t) => t.kind === 'structure')
   const active = threads.filter(
@@ -58,6 +64,46 @@ export default async function IdeasPage() {
             : `${active.length} ripening from your journal.`}
         </p>
       </header>
+
+      {ripe.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+            Ready to harvest
+          </h2>
+          <div className="space-y-3">
+            {ripe.map((t) => (
+              <Link
+                key={t.id}
+                href={`/ideas/${t.id}`}
+                className="block rounded-2xl p-4 ring-1 ring-zinc-950/5 transition-colors hover:bg-zinc-100 dark:ring-white/10 dark:hover:bg-zinc-900"
+              >
+                <div className="text-xs font-semibold text-[#047857] dark:text-[#4ade80]">
+                  Ready to harvest · {t.entryCount} entries
+                </div>
+                <p className="mt-1 text-[15px]/6 font-medium text-zinc-950 dark:text-white">
+                  {t.name}
+                </p>
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  {t.summary}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {suggestions.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+            Suggestions ({suggestions.length})
+          </h2>
+          <div className="space-y-4">
+            {suggestions.map((p) => (
+              <ProposalCard key={p.id} proposal={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {structure.length > 0 && (
         <section>

@@ -1,26 +1,29 @@
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { db } from './index'
 import {
+  curationBatches,
   entries,
   journal,
   posts,
-  syndications,
+  recommendations,
   threads,
   type Proposal,
   type ProposalType,
+  type Recommendation,
 } from './schema'
 import { entryCounts, pendingProposals } from './zettel'
+import { processingCount } from './queries'
+import { openQuestions, recentlyResolvedPrivate } from './questions'
 
 /**
- * Everything blocking on a decision, in one list.
- *
- * The old page interleaved statistics with actions, so "what needs me" had to
- * be inferred by scanning. This models it directly: an item is either waiting
- * on you, moving on its own, or done.
+ * The Needs-you queue: the only things that block on a human, in one list.
+ * Share proposals (ready-to-post entries and curator picks) and blog-gate
+ * decisions live here; zettelkasten maintenance lives on the Ideas surface
+ * via ideasReview() — it is deliberately a when-you-feel-like-it queue.
  */
 export type Attention = {
   id: string
-  kind: 'blog' | 'ready-to-post' | 'develop' | 'stalled'
+  kind: 'blog' | 'develop'
   /** Lower sorts first. Decisions that block publication outrank ideas. */
   priority: number
   title: string
@@ -31,10 +34,212 @@ export type Attention = {
   createdAt: Date
 }
 
-export type Stage = {
-  label: string
-  count: number
-  note: string
+/**
+ * One share proposal, whichever agent raised it. `score` is normalized 0–1
+ * across both sources so the queue has a single honest ordering.
+ */
+export type Share =
+  | { kind: 'entry'; score: number; createdAt: Date; entry: ShareEntry }
+  | { kind: 'recommendation'; score: number; createdAt: Date; rec: Recommendation }
+
+export type ShareEntry = {
+  id: string
+  title: string
+  /** The current draft: suggested (possibly human-refined) or the raw body. */
+  body: string
+  reason: string | null
+  /** Raw judge score, 0–10, for display. */
+  score: number | null
+}
+
+/** A follow-up question, with enough of its root to decide on sight. */
+export type QuestionItem = {
+  id: string
+  question: string
+  entryId: string
+  rootTitle: string
+  createdAt: Date
+}
+
+export type NeedsYou = {
+  blog: Attention[]
+  shares: Share[]
+  questions: QuestionItem[]
+  develop: Attention[]
+  /** Q/A chains that just resolved to private — visible, not silent. */
+  resolved: string[]
+  /** Entries still waiting on a background verdict. */
+  processingCount: number
+  /** What the curator read to pick its candidates, for the section sub-line. */
+  considered: string | null
+}
+
+export async function needsYou(): Promise<NeedsYou> {
+  const [
+    pendingEntries,
+    readyToPost,
+    toDevelop,
+    openRecs,
+    batch,
+    processing,
+    open,
+    resolvedRows,
+  ] = await Promise.all([
+      // Blog entries awaiting approve/reject — the only thing that blocks a
+      // post from going live, so it sorts first.
+      db
+        .select({
+          slug: entries.slug,
+          title: entries.title,
+          body: entries.body,
+          postedAt: entries.postedAt,
+          postId: entries.postId,
+          impressions: sql<number>`(${posts.metrics}->>'impression_count')::int`,
+        })
+        .from(entries)
+        .innerJoin(posts, eq(posts.id, entries.postId))
+        .where(eq(entries.status, 'pending'))
+        .orderBy(desc(entries.postedAt)),
+
+      // Judged worth posting, never sent.
+      db
+        .select()
+        .from(journal)
+        .where(
+          and(
+            eq(journal.verdict, 'post'),
+            isNull(journal.postId),
+            sql`${journal.status} <> 'archived'`,
+          ),
+        )
+        .orderBy(desc(journal.createdAt)),
+
+      // Real ideas that need another pass. Interim: phase 4 turns these into
+      // follow-up questions and this section empties itself.
+      db
+        .select()
+        .from(journal)
+        .where(
+          and(
+            eq(journal.verdict, 'develop'),
+            sql`${journal.status} <> 'archived'`,
+          ),
+        )
+        .orderBy(desc(journal.createdAt)),
+
+      db
+        .select()
+        .from(recommendations)
+        .where(eq(recommendations.status, 'open')),
+
+      db
+        .select({ considered: curationBatches.considered })
+        .from(curationBatches)
+        .orderBy(desc(curationBatches.createdAt))
+        .limit(1),
+
+      processingCount(),
+
+      openQuestions(),
+
+      recentlyResolvedPrivate().catch(
+        () => [] as { question: string; rootBody: string }[],
+      ),
+    ])
+
+  const blog: Attention[] = pendingEntries.map((e) => ({
+    id: e.slug,
+    kind: 'blog' as const,
+    priority: 1,
+    title: e.title,
+    body: e.body,
+    reason: null,
+    score: null,
+    meta: `${e.impressions} impressions on X`,
+    createdAt: e.postedAt,
+  }))
+
+  const shares: Share[] = [
+    ...readyToPost.map((j) => ({
+      kind: 'entry' as const,
+      score: (j.score ?? 5) / 10,
+      createdAt: j.createdAt,
+      entry: {
+        id: j.id,
+        title: firstLine(j.suggested ?? j.body),
+        body: j.suggested ?? j.body,
+        reason: j.reason,
+        score: j.score,
+      },
+    })),
+    ...openRecs.map((r) => ({
+      kind: 'recommendation' as const,
+      score: r.score,
+      createdAt: r.createdAt,
+      rec: r,
+    })),
+  ].sort(
+    (a, b) =>
+      b.score - a.score || b.createdAt.getTime() - a.createdAt.getTime(),
+  )
+
+  // A root with an open question is represented by its QuestionCard — showing
+  // it as a develop card too would double it.
+  const questioned = new Set(open.map((q) => q.entryId))
+  const rootRows = open.length
+    ? await db
+        .select({ id: journal.id, body: journal.body })
+        .from(journal)
+        .where(inArray(journal.id, [...questioned]))
+    : []
+  const rootBody = new Map(rootRows.map((r) => [r.id, r.body]))
+
+  const questions: QuestionItem[] = open.map((q) => ({
+    id: q.id,
+    question: q.question,
+    entryId: q.entryId,
+    rootTitle: firstLine(rootBody.get(q.entryId) ?? ''),
+    createdAt: q.createdAt,
+  }))
+
+  const develop: Attention[] = toDevelop
+    .filter((j) => !questioned.has(j.id))
+    .map((j) => ({
+      id: j.id,
+      kind: 'develop' as const,
+      priority: 3,
+      title: firstLine(j.body),
+      body: j.body,
+      reason: j.reason,
+      score: j.score,
+      meta: null,
+      createdAt: j.createdAt,
+    }))
+
+  const resolved = resolvedRows.map(
+    (r) =>
+      `Your answer settled "${firstLine(r.rootBody, 48)}" as private — it stays in the journal.`,
+  )
+
+  return {
+    blog,
+    shares,
+    questions,
+    develop,
+    resolved,
+    processingCount: processing,
+    considered: openRecs.length ? (batch[0]?.considered ?? null) : null,
+  }
+}
+
+/** The Ideas surface's slow queue: zettelkasten maintenance + harvestable
+ *  threads. Decided at leisure, never part of the daily loop. */
+export async function ideasReview() {
+  const [suggestions, ripe] = await Promise.all([
+    buildProposalViews(),
+    ripeThreads(),
+  ])
+  return { suggestions, ripe }
 }
 
 /**
@@ -61,199 +266,6 @@ export type RipeThread = {
   name: string
   summary: string
   entryCount: number
-}
-
-export type Review = {
-  attention: Attention[]
-  suggestions: ProposalView[]
-  ripe: RipeThread[]
-  moving: { label: string; count: number; note: string }[]
-  stages: Stage[]
-}
-
-export async function review(): Promise<Review> {
-  const [pendingEntries, readyToPost, toDevelop, stalled] = await Promise.all([
-    // Blog entries awaiting approve/reject — the only thing that blocks a post
-    // from going live, so it sorts first.
-    db
-      .select({
-        slug: entries.slug,
-        title: entries.title,
-        body: entries.body,
-        postedAt: entries.postedAt,
-        postId: entries.postId,
-        impressions: sql<number>`(${posts.metrics}->>'impression_count')::int`,
-      })
-      .from(entries)
-      .innerJoin(posts, eq(posts.id, entries.postId))
-      .where(eq(entries.status, 'pending'))
-      .orderBy(desc(entries.postedAt)),
-
-    // Judged worth posting, never sent.
-    db
-      .select()
-      .from(journal)
-      .where(
-        and(
-          eq(journal.verdict, 'post'),
-          isNull(journal.postId),
-          sql`${journal.status} <> 'archived'`,
-        ),
-      )
-      .orderBy(desc(journal.createdAt)),
-
-    // Real ideas that need another pass. Not blocking, but the whole point of
-    // keeping a journal — these are what rot if never surfaced.
-    db
-      .select()
-      .from(journal)
-      .where(
-        and(
-          eq(journal.verdict, 'develop'),
-          sql`${journal.status} <> 'archived'`,
-        ),
-      )
-      .orderBy(desc(journal.createdAt)),
-
-    // Written but never judged — means the model call failed. Needs a retry,
-    // not a decision.
-    db
-      .select()
-      .from(journal)
-      .where(
-        and(
-          isNull(journal.verdict),
-          eq(journal.sealed, false),
-          eq(journal.status, 'unjudged'),
-        ),
-      )
-      .orderBy(desc(journal.createdAt)),
-  ])
-
-  const attention: Attention[] = [
-    ...pendingEntries.map((e) => ({
-      id: e.slug,
-      kind: 'blog' as const,
-      priority: 1,
-      title: e.title,
-      body: e.body,
-      reason: null,
-      score: null,
-      meta: `${e.impressions} impressions on X`,
-      createdAt: e.postedAt,
-    })),
-    ...readyToPost.map((j) => ({
-      id: j.id,
-      kind: 'ready-to-post' as const,
-      priority: 2,
-      title: firstLine(j.suggested ?? j.body),
-      body: j.suggested ?? j.body,
-      reason: j.reason,
-      score: j.score,
-      meta: null,
-      createdAt: j.createdAt,
-    })),
-    ...toDevelop.map((j) => ({
-      id: j.id,
-      kind: 'develop' as const,
-      priority: 3,
-      title: firstLine(j.body),
-      body: j.body,
-      reason: j.reason,
-      score: j.score,
-      meta: null,
-      createdAt: j.createdAt,
-    })),
-    ...stalled.map((j) => ({
-      id: j.id,
-      kind: 'stalled' as const,
-      priority: 4,
-      title: firstLine(j.body),
-      body: j.body,
-      reason: 'Never judged — the model call failed.',
-      score: null,
-      meta: null,
-      createdAt: j.createdAt,
-    })),
-  ].sort(
-    (a, b) =>
-      a.priority - b.priority || b.createdAt.getTime() - a.createdAt.getTime(),
-  )
-
-  const [counts] = (
-    await db.execute<{
-      approved: number
-      published: number
-      unsent: number
-      posted_journal: number
-      journal_total: number
-      x_posts: number
-      judged: number
-      subs: number
-      linkedin_pending: number
-    }>(sql`
-      select
-        (select count(*) from entries where status='approved')::int as approved,
-        (select count(*) from entries where status='published')::int as published,
-        (select count(*) from entries e where e.status='published'
-           and not exists (
-             select 1 from issues i where i.slugs::jsonb ? e.slug
-           ))::int as unsent,
-        (select count(*) from journal where post_id is not null)::int as posted_journal,
-        (select count(*) from journal)::int as journal_total,
-        (select count(*) from posts)::int as x_posts,
-        (select count(*) from decisions where reason not like 'gate:%')::int as judged,
-        (select count(*) from subscribers
-           where confirmed_at is not null and unsubscribed_at is null)::int as subs,
-        (select count(*) from syndications
-           where target='linkedin' and status='pending')::int as linkedin_pending
-    `)
-  ).rows
-
-  const [suggestions, ripe] = await Promise.all([
-    buildProposalViews(),
-    ripeThreads(),
-  ])
-
-  const moving = [
-    {
-      label: 'Approved',
-      count: counts.approved,
-      note: 'goes live on the next publish run',
-    },
-    {
-      label: 'Published, not yet mailed',
-      count: counts.unsent,
-      note: counts.subs
-        ? 'in the next newsletter'
-        : 'no subscribers yet, so nothing will send',
-    },
-  ].filter((m) => m.count > 0)
-
-  const stages: Stage[] = [
-    {
-      label: 'Journal',
-      count: counts.journal_total,
-      note: `${counts.posted_journal} posted`,
-    },
-    {
-      label: 'On X',
-      count: counts.x_posts,
-      note: `${counts.judged} reached Grok`,
-    },
-    {
-      label: 'Blog',
-      count: counts.published,
-      note: counts.published === 1 ? 'post live' : 'posts live',
-    },
-    {
-      label: 'Newsletter',
-      count: counts.subs,
-      note: counts.subs === 1 ? 'subscriber' : 'subscribers',
-    },
-  ]
-
-  return { attention, suggestions, ripe, moving, stages }
 }
 
 async function ripeThreads(): Promise<RipeThread[]> {
@@ -298,7 +310,9 @@ async function buildProposalViews(): Promise<ProposalView[]> {
   const byThread = new Map(threadRows.map((t) => [t.id, t]))
   const byEntry = new Map(entryRows.map((e) => [e.id, e]))
 
-  return pending.map((p) => view(p, byThread, byEntry))
+  return pending
+    .map((p) => view(p, byThread, byEntry))
+    .sort((a, b) => b.confidence - a.confidence)
 }
 
 function view(

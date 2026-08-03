@@ -6,7 +6,7 @@ import clsx from 'clsx'
 
 const TABS = [
   { href: '/journal', label: 'Write', icon: PencilIcon },
-  { href: '/admin', label: 'Review', icon: InboxIcon },
+  { href: '/admin', label: 'Needs you', icon: InboxIcon },
   { href: '/ideas', label: 'Ideas', icon: BulbIcon },
   { href: '/settings', label: 'Settings', icon: GearIcon },
 ] as const

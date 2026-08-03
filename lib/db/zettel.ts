@@ -128,9 +128,10 @@ export async function insertProposal(row: {
   reasoning: string
   confidence: number
   source: 'matcher' | 'librarian'
-}) {
+}): Promise<string> {
+  const id = randomUUID()
   await db.insert(proposals).values({
-    id: randomUUID(),
+    id,
     ...row,
     entryId: row.payload.entryId ?? null,
     threadId:
@@ -139,6 +140,7 @@ export async function insertProposal(row: {
       row.payload.sourceThreadId ??
       null,
   })
+  return id
 }
 
 /**

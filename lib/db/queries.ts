@@ -188,14 +188,106 @@ export async function saveEntryVerdict(
     suggested: string
   },
 ) {
+  // Explicit field picks, never a spread: the judge's output type carries
+  // extra fields (question) that are not journal columns, and callers pass
+  // it whole.
   await db
     .update(journal)
-    .set({ ...v, status: 'judged', judgedAt: new Date() })
+    .set({
+      verdict: v.verdict,
+      score: v.score,
+      reason: v.reason,
+      suggested: v.suggested,
+      status: 'judged',
+      judgedAt: new Date(),
+    })
     .where(eq(journal.id, id))
 }
 
 export async function setJournalStatus(id: string, status: JournalStatus) {
   await db.update(journal).set({ status }).where(eq(journal.id, id))
+}
+
+/** Persist a human-refined draft. `suggested` is the draft-to-post field;
+ *  the original entry body is never touched. */
+export async function saveDraft(id: string, text: string) {
+  await db.update(journal).set({ suggested: text }).where(eq(journal.id, id))
+}
+
+/**
+ * Claim an entry for judging. after() on capture and the sweep route both
+ * process through this conditional update, so a row can never be judged
+ * twice concurrently. A claim older than 5 minutes is treated as dead —
+ * whatever held it was killed — so retry needs no release bookkeeping.
+ */
+export async function claimForJudging(id: string): Promise<boolean> {
+  const claimed = await db
+    .update(journal)
+    .set({ judgeClaimedAt: new Date() })
+    .where(
+      and(
+        eq(journal.id, id),
+        eq(journal.status, 'unjudged'),
+        sql`(${journal.judgeClaimedAt} is null or ${journal.judgeClaimedAt} < now() - interval '5 minutes')`,
+      ),
+    )
+    .returning({ id: journal.id })
+  return claimed.length > 0
+}
+
+/** Entries whose background judging died mid-flight, oldest first. */
+export async function unjudgedEntries(opts: {
+  limit: number
+  olderThanMinutes?: number
+}) {
+  const conditions = [
+    eq(journal.status, 'unjudged'),
+    eq(journal.sealed, false),
+  ]
+  if (opts.olderThanMinutes) {
+    conditions.push(
+      sql`${journal.createdAt} < now() - make_interval(mins => ${opts.olderThanMinutes})`,
+    )
+  }
+  return db
+    .select()
+    .from(journal)
+    .where(and(...conditions))
+    .orderBy(journal.createdAt)
+    .limit(opts.limit)
+}
+
+/** Judged entries whose matcher run silently failed, oldest first. */
+export async function unmatchedEntries(limit: number) {
+  return db
+    .select()
+    .from(journal)
+    .where(
+      and(
+        eq(journal.status, 'judged'),
+        eq(journal.sealed, false),
+        isNull(journal.matchedAt),
+      ),
+    )
+    .orderBy(journal.createdAt)
+    .limit(limit)
+}
+
+export async function markMatched(id: string) {
+  await db
+    .update(journal)
+    .set({ matchedAt: new Date() })
+    .where(eq(journal.id, id))
+}
+
+/** How many entries are still waiting on a verdict — the "N still
+ *  processing" line in Needs you. */
+export async function processingCount(): Promise<number> {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(journal)
+    .where(and(eq(journal.status, 'unjudged'), eq(journal.sealed, false)))
+  return row?.count ?? 0
 }
 
 /**

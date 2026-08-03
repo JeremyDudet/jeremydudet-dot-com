@@ -19,7 +19,7 @@ export function CurateButton() {
       setNote(
         json.count === 0
           ? 'Nothing worth pushing today — the greeting explains.'
-          : `${json.count} candidate${json.count === 1 ? '' : 's'} — see Write or Review.`,
+          : `${json.count} candidate${json.count === 1 ? '' : 's'} — see Write or Needs you.`,
       )
     setBusy(false)
     router.refresh()

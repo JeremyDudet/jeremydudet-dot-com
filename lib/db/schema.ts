@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import {
   boolean,
   index,
@@ -422,6 +423,9 @@ export const journal = pgTable(
 
     sealed: boolean('sealed').notNull().default(false),
     status: text('status').$type<JournalStatus>().notNull().default('unjudged'),
+    /** Dictated, not typed. Persisted so a background retry can still judge
+     *  the thought under the spoken-note rubric instead of as typed prose. */
+    spoken: boolean('spoken').notNull().default(false),
 
     /** The idea this entry feeds. Null = not yet threaded. */
     threadId: text('thread_id'),
@@ -434,6 +438,13 @@ export const journal = pgTable(
     // Grok's tightened version, ready to post. Editable before sending.
     suggested: text('suggested'),
     judgedAt: timestamp('judged_at', { withTimezone: true }),
+    /** Processing claim. after() and the sweep both judge through a
+     *  conditional update on this column, so they can never double-judge;
+     *  a claim older than 5 minutes is considered dead and can be retaken. */
+    judgeClaimedAt: timestamp('judge_claimed_at', { withTimezone: true }),
+    /** Set once the matcher has run (any decision, including none). Null on
+     *  a judged entry means the matcher silently failed — the sweep retries. */
+    matchedAt: timestamp('matched_at', { withTimezone: true }),
 
     postId: text('post_id'), // X post id once published
     postedAt: timestamp('posted_at', { withTimezone: true }),
@@ -449,6 +460,79 @@ export const journal = pgTable(
 )
 
 export type JournalEntry = typeof journal.$inferSelect
+
+/* ------------------------------------------------------------- feedback -- */
+
+export type FeedbackKind = 'entry' | 'recommendation'
+export type FeedbackSentiment = 'negative' | 'positive'
+
+/**
+ * Natural-language taste signals. `raw` is what he said on a reject (or the
+ * draft-vs-published delta on a publish); `distilled` is one grok-condensed
+ * line injected into future judge/curator prompts. Distillation happens in
+ * after(), so `distilled` may lag or stay null — injection falls back to a
+ * clipped `raw`.
+ */
+export const feedback = pgTable(
+  'feedback',
+  {
+    id: text('id').primaryKey(),
+    subjectKind: text('subject_kind').$type<FeedbackKind>().notNull(),
+    subjectId: text('subject_id').notNull(),
+    sentiment: text('sentiment')
+      .$type<FeedbackSentiment>()
+      .notNull()
+      .default('negative'),
+    /** Denormalised for filtering; null when the subject has no entry. */
+    entryId: text('entry_id'),
+    threadId: text('thread_id'),
+    raw: text('raw').notNull(),
+    spoken: boolean('spoken').notNull().default(false),
+    distilled: text('distilled'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('feedback_created_at_idx').on(t.createdAt)],
+)
+
+export type Feedback = typeof feedback.$inferSelect
+
+/* ------------------------------------------------------------ questions -- */
+
+export type QuestionStatus = 'open' | 'answered' | 'dismissed'
+
+/**
+ * A follow-up the judge asks when a thought is worth developing and the
+ * missing piece is something only Jeremy can supply. Answering creates a new
+ * journal entry (linked via answerEntryId — never journal.parentId, which
+ * means "split child") and re-judges the root on the full Q/A transcript.
+ * The partial unique index enforces at most one open question per root.
+ */
+export const questions = pgTable(
+  'questions',
+  {
+    id: text('id').primaryKey(),
+    entryId: text('entry_id').notNull(), // the root journal entry
+    threadId: text('thread_id'), // inherited from the root at creation
+    question: text('question').notNull(),
+    source: text('source').notNull().default('judge'),
+    status: text('status').$type<QuestionStatus>().notNull().default('open'),
+    answerEntryId: text('answer_entry_id'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    answeredAt: timestamp('answered_at', { withTimezone: true }),
+  },
+  (t) => [
+    index('questions_status_idx').on(t.status),
+    uniqueIndex('questions_one_open_per_root')
+      .on(t.entryId)
+      .where(sql`${t.status} = 'open'`),
+  ],
+)
+
+export type Question = typeof questions.$inferSelect
 
 export type Post = typeof posts.$inferSelect
 export type Decision = typeof decisions.$inferSelect

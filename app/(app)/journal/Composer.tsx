@@ -1,28 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import clsx from 'clsx'
 import { useRecorder } from '@/components/useRecorder'
 import { uuid } from '@/lib/uuid'
-import type { JournalVerdict } from '@/lib/db/schema'
-
-type Verdict = {
-  verdict: JournalVerdict
-  score: number
-  reason: string
-  suggested: string
-}
 
 const OUTBOX = 'journal.outbox'
-type Pending = { clientId: string; body: string; sealed: boolean; spoken?: boolean }
-
-const VERDICT_COPY: Record<JournalVerdict, { label: string; tone: string }> = {
-  post: { label: 'Worth posting', tone: 'text-[#047857] dark:text-[#4ade80]' },
-  develop: {
-    label: 'Needs developing',
-    tone: 'text-[#b45309] dark:text-[#fbbf24]',
-  },
-  private: { label: 'Keep private', tone: 'text-zinc-500 dark:text-zinc-400' },
+type Pending = {
+  clientId: string
+  body: string
+  sealed: boolean
+  spoken?: boolean
+  questionId?: string
 }
 
 /**
@@ -37,17 +27,22 @@ export function Composer({
   canRecord,
   initialBody,
   recId,
+  questionId,
+  answerContext,
 }: {
   canRecord: boolean
   /** Prefill from a curator recommendation — a template or draft to write into. */
   initialBody?: string
   /** When set, a successful save marks the recommendation used. */
   recId?: string
+  /** Answer mode: the entry answers this follow-up question. */
+  questionId?: string
+  answerContext?: { question: string; rootExcerpt: string }
 }) {
+  const router = useRouter()
   const [body, setBody] = useState(initialBody ?? '')
   const [sealed, setSealed] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const [spoken, setSpoken] = useState(false)
   const box = useRef<HTMLTextAreaElement>(null)
@@ -90,7 +85,7 @@ export function Composer({
     setBusy(true)
     setNote(null)
 
-    const item: Pending = { clientId: uuid(), body: text, sealed, spoken }
+    const item: Pending = { clientId: uuid(), body: text, sealed, spoken, questionId }
 
     const res = await fetch('/api/journal', {
       method: 'POST',
@@ -106,8 +101,15 @@ export function Composer({
       return
     }
 
-    const json = await res.json()
+    await res.json().catch(() => null)
     reset()
+
+    // Answer sent — back to the queue, where the question card is now gone
+    // and the root will resurface once the re-judge lands.
+    if (questionId) {
+      router.replace('/admin')
+      return
+    }
 
     // Writing-from-a-recommendation completed — record that it was taken up.
     // Fire-and-forget: a failed marker never blocks the save that mattered.
@@ -119,8 +121,15 @@ export function Composer({
       }).catch(() => null)
     }
 
-    if (json.entry?.verdict) setVerdict(json.entry as Verdict)
-    else setNote(sealed ? 'Sealed. Not sent to Grok.' : 'Saved.')
+    // Judging happens in the background; anything worth your attention shows
+    // up in Needs you. The confirmation clears itself so the box is instantly
+    // ready for the next thought.
+    const confirmation = sealed ? 'Sealed. Not sent to Grok.' : 'Submitted.'
+    setNote(confirmation)
+    setTimeout(
+      () => setNote((n) => (n === confirmation ? null : n)),
+      2500,
+    )
 
     setBusy(false)
   }
@@ -131,47 +140,34 @@ export function Composer({
     setSpoken(false)
   }
 
-  if (verdict) {
-    const copy = VERDICT_COPY[verdict.verdict]
-    return (
-      <div className="flex min-h-[70dvh] flex-col justify-center gap-6">
-        <div>
-          <p className={clsx('text-sm font-semibold', copy.tone)}>
-            {copy.label}
-          </p>
-          <p className="mt-2 text-base/7 text-zinc-700 dark:text-zinc-300">
-            {verdict.reason}
-          </p>
-        </div>
-
-        {verdict.verdict === 'post' && (
-          <p className="rounded-2xl bg-zinc-100 p-4 text-[15px]/6 whitespace-pre-wrap text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
-            {verdict.suggested}
-          </p>
-        )}
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => setVerdict(null)}
-            className="rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white dark:bg-white dark:text-zinc-950"
-          >
-            Write another
-          </button>
-          {verdict.verdict !== 'private' && (
-            <a
-              href="/admin"
-              className="rounded-full px-5 py-2.5 text-sm text-zinc-600 ring-1 ring-zinc-950/10 dark:text-zinc-400 dark:ring-white/15"
-            >
-              Review
-            </a>
-          )}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex min-h-[78dvh] flex-col">
+      {/* Answer mode: the question is the whole context. The banner stays
+          pinned above the box so a long dictation never loses the thread. */}
+      {answerContext && (
+        <div className="mb-4 rounded-2xl bg-zinc-100/60 p-4 dark:bg-zinc-900/60">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-xs font-semibold text-[#4a3aa7] dark:text-[#9085e9]">
+              Answering
+            </span>
+            <a
+              href="/journal"
+              className="text-xs text-zinc-500 dark:text-zinc-400"
+            >
+              Cancel
+            </a>
+          </div>
+          <p className="mt-1 text-[15px]/6 font-medium text-zinc-950 dark:text-white">
+            {answerContext.question}
+          </p>
+          {answerContext.rootExcerpt && (
+            <p className="mt-2 line-clamp-3 text-sm text-zinc-500 dark:text-zinc-400">
+              About: {answerContext.rootExcerpt}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Top bar: date grounds the page; Save stays reachable above the
           keyboard. Sealed is a mode you set before writing, so it lives here
           too rather than hiding at the bottom. */}
@@ -209,7 +205,7 @@ export function Composer({
                 : 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950',
             )}
           >
-            {busy ? 'Thinking…' : 'Save'}
+            {busy ? 'Saving…' : questionId ? 'Send answer' : 'Save'}
           </button>
         </div>
       </header>
@@ -218,7 +214,11 @@ export function Composer({
         ref={box}
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        placeholder="What are you thinking?"
+        placeholder={
+          questionId
+            ? 'Answer with whatever comes — voice or text.'
+            : 'What are you thinking?'
+        }
         autoFocus
         className="w-full grow resize-none border-0 bg-transparent text-[18px]/8 text-zinc-950 outline-none placeholder:text-zinc-300 dark:text-white dark:placeholder:text-zinc-700"
       />

@@ -78,13 +78,14 @@ function threadDigest(threads: Thread[], counts: Map<string, number>) {
 }
 
 /**
- * Judge the new entry against the open threads. Returns the number of
- * proposals queued (0–1). Caller guarantees the entry is not sealed.
+ * Judge the new entry against the open threads. Returns the queued proposal
+ * (0–1 of them), so the caller can auto-accept the safe, high-confidence
+ * kind. Caller guarantees the entry is not sealed.
  */
 export async function matchEntry(entry: {
   id: string
   body: string
-}): Promise<number> {
+}): Promise<{ proposalId: string; type: string; confidence: number } | null> {
   const threads = await openThreads()
   const counts = await entryCounts()
 
@@ -101,10 +102,12 @@ export async function matchEntry(entry: {
   })
 
   const m = completion.choices[0]?.message.parsed
-  if (!m || m.decision === 'none') return 0
+  if (!m || m.decision === 'none') return null
 
   // The model can only join what it was shown.
-  if (m.decision === 'join' && !threads.some((t) => t.id === m.threadId)) return 0
+  if (m.decision === 'join' && !threads.some((t) => t.id === m.threadId)) {
+    return null
+  }
 
   const proposal =
     m.decision === 'join'
@@ -130,13 +133,14 @@ export async function matchEntry(entry: {
             payload: { entryId: entry.id, parts: m.parts },
           }
 
-  await insertProposal({
+  const confidence = clamp01(m.confidence)
+  const proposalId = await insertProposal({
     ...proposal,
     reasoning: m.reasoning,
-    confidence: clamp01(m.confidence),
+    confidence,
     source: 'matcher',
   })
-  return 1
+  return { proposalId, type: proposal.type, confidence }
 }
 
 /* -------------------------------------------------------------- librarian -- */

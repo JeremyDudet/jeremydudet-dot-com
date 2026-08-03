@@ -22,7 +22,7 @@ export function MaintenanceButton() {
       setNote('Librarian found nothing to suggest.')
     } else {
       setNote(
-        `${json.proposed} suggestion${json.proposed === 1 ? '' : 's'} queued — they are waiting in Review.`,
+        `${json.proposed} suggestion${json.proposed === 1 ? '' : 's'} queued — they are waiting on the Ideas tab.`,
       )
     }
     setBusy(false)

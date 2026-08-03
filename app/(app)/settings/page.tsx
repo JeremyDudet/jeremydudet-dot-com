@@ -5,8 +5,10 @@ import { DashboardView } from '@/components/Dashboard'
 import { db } from '@/lib/db'
 import { dashboard, recentDecisions } from '@/lib/db/stats'
 import { currentCuration } from '@/lib/curator'
+import { recentFeedback } from '@/lib/feedback'
 import { sharingMode } from '@/lib/settings'
 import { CurateButton } from './CurateButton'
+import { FeedbackList, type LearnedLine } from './FeedbackList'
 import { LogoutButton } from './LogoutButton'
 import { MaintenanceButton } from './MaintenanceButton'
 import { SharingModeToggle } from './SharingModeToggle'
@@ -21,13 +23,25 @@ export const metadata: Metadata = { title: 'Settings' }
  */
 export default async function SettingsPage() {
   await assertAdmin()
-  const [stats, log, zettel, mode, curation] = await Promise.all([
+  const [stats, log, zettel, mode, curation, learned] = await Promise.all([
     dashboard().catch(() => null),
     recentDecisions(8).catch(() => []),
     zettelHealth().catch(() => null),
     sharingMode(),
     currentCuration().catch(() => null),
+    recentFeedback(20).catch(() => []),
   ])
+
+  const learnedLines: LearnedLine[] = learned.map((f) => ({
+    id: f.id,
+    line: f.distilled ?? f.raw,
+    pending: !f.distilled,
+    sentiment: f.sentiment,
+    when: f.createdAt.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    }),
+  }))
 
   return (
     <div className="space-y-10">
@@ -42,8 +56,8 @@ export default async function SettingsPage() {
           The curator
         </h2>
         <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
-          Re-reads everything after each entry and surfaces what&apos;s worth
-          sharing.
+          Re-reads everything nightly and surfaces what&apos;s worth sharing in
+          Needs you.
           {curation &&
             ` Last run considered ${curation.batch.considered}.`}
         </p>
@@ -52,6 +66,19 @@ export default async function SettingsPage() {
           <CurateButton />
         </div>
       </section>
+
+      {learnedLines.length > 0 && (
+        <section>
+          <h2 className="mb-1 text-sm font-semibold text-zinc-950 dark:text-white">
+            What I&apos;ve learned
+          </h2>
+          <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+            Distilled from your rejections and edits, injected into future
+            judging. Feedback older than 60 days ages out on its own.
+          </p>
+          <FeedbackList items={learnedLines} />
+        </section>
+      )}
 
       {zettel && (
         <section>
@@ -73,7 +100,7 @@ export default async function SettingsPage() {
           </div>
           <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
             The librarian also runs every Sunday. It only suggests — everything
-            waits in Review for your tap.
+            waits on the Ideas tab for your tap.
           </p>
         </section>
       )}

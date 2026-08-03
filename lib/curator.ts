@@ -15,6 +15,7 @@ import {
   type SharingMode,
 } from '@/lib/db/schema'
 import { sharingMode } from '@/lib/settings'
+import { feedbackFor } from '@/lib/feedback'
 
 /**
  * The curator: a living agent over the whole Zettelkasten. On every new entry
@@ -59,7 +60,7 @@ function entryLine(e: JournalEntry): string {
 }
 
 async function buildCorpus() {
-  const [entriesAll, threadsAll, published, recent] = await Promise.all([
+  const [entriesAll, threadsAll, published, recent, taste] = await Promise.all([
     visibleEntries(),
     db.select().from(threads).orderBy(desc(threads.updatedAt)),
     db
@@ -77,6 +78,7 @@ async function buildCorpus() {
       )
       .orderBy(desc(recommendations.createdAt))
       .limit(20),
+    feedbackFor('curator').catch(() => [] as string[]),
   ])
 
   const threadLines = threadsAll.map((t) => {
@@ -111,6 +113,9 @@ async function buildCorpus() {
     ``,
     `YOUR RECENT RECOMMENDATIONS AND WHAT HE DID WITH THEM:`,
     historyLines.join('\n') || '(none yet)',
+    ``,
+    `RECENT FEEDBACK FROM JEREMY (his taste, in his own words):`,
+    taste.join('\n') || '(none yet)',
   ].join('\n')
 
   const considered = `${threadLines.length} threads, ${entriesAll.length} entries, ${sharedLines.length} shared pieces`
@@ -262,6 +267,8 @@ For each candidate:
 - score: 0 to 1, how strongly you would push this today.
 - Skip anything already shared unless there is a genuinely new angle.
 - Do not re-pitch what he recently DISMISSED unless something material changed.
+- Honor RECENT FEEDBACK FROM JEREMY when selecting and scoring — it is his
+  taste in his own words. The North Star above still wins where they conflict.
 - Never build a candidate from private-theme material. The themes exist so you
   understand his season; their content is not yours to share.
 
@@ -431,6 +438,17 @@ export async function decideRecommendation(
     .set({ status, decidedAt: new Date() })
     .where(
       and(eq(recommendations.id, id), ne(recommendations.status, status)),
+    )
+}
+
+/** Undo a dismissal. Only a dismissed row can reopen — a used or stale one
+ *  has moved on. */
+export async function reopenRecommendation(id: string) {
+  await db
+    .update(recommendations)
+    .set({ status: 'open', decidedAt: null })
+    .where(
+      and(eq(recommendations.id, id), eq(recommendations.status, 'dismissed')),
     )
 }
 

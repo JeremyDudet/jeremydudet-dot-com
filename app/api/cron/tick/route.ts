@@ -42,6 +42,10 @@ export async function GET(req: Request) {
       steps.maintain = await run(`${base}/api/maintain`, 'POST')
     }
 
+    // Sweep journal entries whose background processing died mid-flight —
+    // the last-resort retry behind capture's own after() and drain.
+    steps.journal = await run(`${base}/api/journal/process`, 'POST')
+
     // Daily curation after judge: post-cooldown verdicts change the corpus,
     // so the day's best share candidates get re-ranked even on no-entry days.
     steps.curate = await run(`${base}/api/curate`, 'POST')

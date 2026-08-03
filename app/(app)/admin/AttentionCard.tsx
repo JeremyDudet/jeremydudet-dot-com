@@ -8,15 +8,10 @@ import { decide } from './actions'
 
 const KIND = {
   blog: { label: 'Blog post', tone: 'text-[#047857] dark:text-[#4ade80]' },
-  'ready-to-post': {
-    label: 'Ready to post',
-    tone: 'text-[#2a78d6] dark:text-[#3987e5]',
-  },
   develop: {
     label: 'Needs developing',
     tone: 'text-[#b45309] dark:text-[#fbbf24]',
   },
-  stalled: { label: 'Never judged', tone: 'text-zinc-500 dark:text-zinc-400' },
 } as const
 
 /**
@@ -111,33 +106,6 @@ export function AttentionCard({ item }: { item: Attention }) {
           </>
         )}
 
-        {item.kind === 'ready-to-post' &&
-          (open ? (
-            <>
-              <Primary
-                disabled={busy || !text.trim()}
-                onClick={() => journalAction({ action: 'post', text })}
-              >
-                Post it
-              </Primary>
-              <Ghost disabled={busy} onClick={() => setOpen(false)}>
-                Cancel
-              </Ghost>
-            </>
-          ) : (
-            <>
-              <Primary disabled={busy} onClick={() => setOpen(true)}>
-                Review &amp; post
-              </Primary>
-              <Ghost
-                disabled={busy}
-                onClick={() => journalAction({ action: 'archive' })}
-              >
-                Not now
-              </Ghost>
-            </>
-          ))}
-
         {item.kind === 'develop' && (
           <>
             <Primary disabled={busy} onClick={() => setOpen((o) => !o)}>
@@ -158,15 +126,6 @@ export function AttentionCard({ item }: { item: Attention }) {
               Drop it
             </Ghost>
           </>
-        )}
-
-        {item.kind === 'stalled' && (
-          <Primary
-            disabled={busy}
-            onClick={() => journalAction({ action: 'judge' })}
-          >
-            Judge it
-          </Primary>
         )}
       </div>
     </article>

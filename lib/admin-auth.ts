@@ -19,13 +19,17 @@ export async function assertAdmin() {
  * bearer token. Never use this for anything that reads the journal back —
  * a phone lost with the Shortcut installed should leak write access, not the
  * archive.
+ *
+ * Returns which credential authorized: the Shortcut ('token') waits for a
+ * verdict so Siri can speak it back, while the app ('session') gets an
+ * instant response with processing deferred.
  */
-export async function assertCanCapture() {
+export async function assertCanCapture(): Promise<'session' | 'token'> {
   const jar = await cookies()
-  if (verifySession(jar.get(SESSION_COOKIE)?.value)) return
+  if (verifySession(jar.get(SESSION_COOKIE)?.value)) return 'session'
 
   const auth = (await headers()).get('authorization')
-  if (bearerTokenMatches(auth)) return
+  if (bearerTokenMatches(auth)) return 'token'
 
   throw new Error('unauthorized')
 }

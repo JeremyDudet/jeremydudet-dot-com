@@ -74,8 +74,8 @@ export default async function ThreadPage({
           {pending.length} pending{' '}
           {pending.length === 1 ? 'suggestion touches' : 'suggestions touch'}{' '}
           this idea —{' '}
-          <Link href="/admin" className="underline underline-offset-2">
-            decide in Review
+          <Link href="/ideas" className="underline underline-offset-2">
+            decide under Suggestions
           </Link>
           .
         </p>

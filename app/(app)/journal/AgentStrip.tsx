@@ -53,7 +53,7 @@ export function AgentStrip({
               href="/admin"
               className="text-xs text-zinc-400 underline underline-offset-2 dark:text-zinc-500"
             >
-              Full cases in Review
+              Full cases in Needs you
             </a>
           </li>
         </ul>

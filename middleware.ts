@@ -21,6 +21,8 @@ export const config = {
     '/api/curate',
     '/api/settings',
     '/api/recommendations/:path*',
+    '/api/feedback/:path*',
+    '/api/questions/:path*',
   ],
 }
 

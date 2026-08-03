@@ -1,12 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { assertAdmin } from '@/lib/admin-auth'
 import { judgeEntry } from '@/lib/judge'
+import { maybeAskQuestion } from '@/lib/process-entry'
 import { publish } from '@/lib/social'
+import {
+  deleteFeedback,
+  distillFeedback,
+  feedbackFor,
+  recordFeedback,
+} from '@/lib/feedback'
 import {
   claimForPosting,
   journalEntry,
   recordJournalPost,
   releasePostingClaim,
+  saveDraft,
   saveEntryVerdict,
   setJournalStatus,
   upsertPosts,
@@ -18,6 +26,9 @@ export const maxDuration = 60
 type Action =
   | { action: 'judge' }
   | { action: 'archive' }
+  | { action: 'reject'; feedback?: string; spoken?: boolean }
+  | { action: 'restore'; feedbackId?: string }
+  | { action: 'save_draft'; text: string }
   | { action: 'post'; text: string }
 
 export async function POST(
@@ -45,13 +56,72 @@ export async function POST(
           { status: 400 },
         )
       }
-      const verdict = await judgeEntry(entry.body)
+      const feedback = await feedbackFor('judge').catch(() => [])
+      const verdict = await judgeEntry(entry.body, {
+        spoken: entry.spoken,
+        feedback,
+      })
       await saveEntryVerdict(id, verdict)
+      await maybeAskQuestion(entry, verdict)
       return NextResponse.json({ entry: { ...entry, ...verdict, status: 'judged' } })
     }
 
     case 'archive': {
       await setJournalStatus(id, 'archived')
+      return NextResponse.json({ ok: true })
+    }
+
+    // Reject a share proposal, optionally teaching the system why. The raw
+    // feedback lands synchronously; distillation runs after the response so
+    // rejecting feels like submitting.
+    case 'reject': {
+      await setJournalStatus(id, 'archived')
+
+      const raw = payload.feedback?.trim()
+      if (!raw) return NextResponse.json({ ok: true })
+
+      const feedbackId = await recordFeedback({
+        subjectKind: 'entry',
+        subjectId: id,
+        entryId: id,
+        threadId: entry.threadId,
+        raw,
+        spoken: payload.spoken === true,
+      })
+      after(async () => {
+        try {
+          await distillFeedback(feedbackId, entry.suggested ?? entry.body)
+        } catch (err) {
+          console.error('[journal] distill failed', err)
+        }
+      })
+      return NextResponse.json({ ok: true, feedbackId })
+    }
+
+    // Undo a reject. The retracted feedback row goes with it — an oops must
+    // not teach the system anything.
+    case 'restore': {
+      if (entry.postId) {
+        return NextResponse.json({ error: 'already posted' }, { status: 409 })
+      }
+      await setJournalStatus(id, 'judged')
+      if (payload.feedbackId) {
+        await deleteFeedback(payload.feedbackId).catch(() => null)
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // Persist a refined draft so editing survives the app being backgrounded.
+    // `suggested` is the draft-to-post field; the original body is untouched.
+    case 'save_draft': {
+      const text = payload.text?.trim()
+      if (!text) {
+        return NextResponse.json({ error: 'empty text' }, { status: 400 })
+      }
+      if (entry.postId) {
+        return NextResponse.json({ error: 'already posted' }, { status: 409 })
+      }
+      await saveDraft(id, text)
       return NextResponse.json({ ok: true })
     }
 
@@ -104,6 +174,28 @@ export async function POST(
             metricsUpdatedAt: new Date(),
           },
         ])
+
+        // The positive half of the taste loop: what he changed before
+        // publishing reveals taste the way a rejection does. Publishing
+        // as-is records nothing — that would just be noise.
+        const draft = (entry.suggested ?? entry.body).trim()
+        if (text !== draft) {
+          after(async () => {
+            try {
+              const feedbackId = await recordFeedback({
+                subjectKind: 'entry',
+                subjectId: id,
+                entryId: id,
+                threadId: entry.threadId,
+                raw: text,
+                sentiment: 'positive',
+              })
+              await distillFeedback(feedbackId, draft)
+            } catch (err) {
+              console.error('[journal] edit-delta feedback failed', err)
+            }
+          })
+        }
 
         return NextResponse.json({ ok: true, postId })
       } catch (err) {
