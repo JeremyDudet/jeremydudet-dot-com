@@ -17,9 +17,11 @@ export async function GET(req: Request) {
   const denied = authorize(req)
   if (denied) return denied
 
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : SITE.url
+  // Always the public domain, never VERCEL_URL: deployment URLs sit behind
+  // Vercel's SSO deployment protection, so tick's internal step calls were
+  // 302'd to an auth wall and silently did nothing — the cron "ran" while
+  // the pipeline stood still. The custom domain is the one open front door.
+  const base = SITE.url
 
   try {
     const steps: Record<string, unknown> = {}

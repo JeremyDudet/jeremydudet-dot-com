@@ -1,6 +1,10 @@
 export const SITE = {
   name: 'Jeremy Dudet',
-  url: 'https://jeremydudet.com',
+  // www, not apex: www is the primary host on Vercel and the apex 308s to it.
+  // Server-to-server calls (the cron tick authenticating into its own steps)
+  // MUST NOT cross that redirect — fetch strips the Authorization header on
+  // cross-origin redirects, which silently broke the nightly pipeline.
+  url: 'https://www.jeremydudet.com',
   description:
     'Jeremy Dudet — Developer building AI-powered tools for restaurants. Former Uber engineer, founder of StockCount. Based in Austin, TX.',
   social: {
