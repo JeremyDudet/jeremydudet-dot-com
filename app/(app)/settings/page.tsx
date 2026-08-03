@@ -4,8 +4,12 @@ import { assertAdmin } from '@/lib/admin-auth'
 import { DashboardView } from '@/components/Dashboard'
 import { db } from '@/lib/db'
 import { dashboard, recentDecisions } from '@/lib/db/stats'
+import { currentCuration } from '@/lib/curator'
+import { sharingMode } from '@/lib/settings'
+import { CurateButton } from './CurateButton'
 import { LogoutButton } from './LogoutButton'
 import { MaintenanceButton } from './MaintenanceButton'
+import { SharingModeToggle } from './SharingModeToggle'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Settings' }
@@ -17,10 +21,12 @@ export const metadata: Metadata = { title: 'Settings' }
  */
 export default async function SettingsPage() {
   await assertAdmin()
-  const [stats, log, zettel] = await Promise.all([
+  const [stats, log, zettel, mode, curation] = await Promise.all([
     dashboard().catch(() => null),
     recentDecisions(8).catch(() => []),
     zettelHealth().catch(() => null),
+    sharingMode(),
+    currentCuration().catch(() => null),
   ])
 
   return (
@@ -30,6 +36,22 @@ export default async function SettingsPage() {
       </h1>
 
       {stats && <DashboardView stats={stats} />}
+
+      <section>
+        <h2 className="mb-1 text-sm font-semibold text-zinc-950 dark:text-white">
+          The curator
+        </h2>
+        <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
+          Re-reads everything after each entry and surfaces what&apos;s worth
+          sharing.
+          {curation &&
+            ` Last run considered ${curation.batch.considered}.`}
+        </p>
+        <SharingModeToggle current={mode} />
+        <div className="mt-4">
+          <CurateButton />
+        </div>
+      </section>
 
       {zettel && (
         <section>

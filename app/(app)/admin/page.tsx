@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { assertAdmin } from '@/lib/admin-auth'
+import { currentCuration } from '@/lib/curator'
 import { review } from '@/lib/db/review'
 import { AttentionCard } from './AttentionCard'
 import { ProposalCard } from './ProposalCard'
+import { RecommendationCard } from './RecommendationCard'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Review' }
@@ -18,9 +20,11 @@ export const metadata: Metadata = { title: 'Review' }
  */
 export default async function ReviewPage() {
   await assertAdmin()
-  const { attention, suggestions, ripe, moving, stages } = await review()
+  const [{ attention, suggestions, ripe, moving, stages }, curation] =
+    await Promise.all([review(), currentCuration().catch(() => null)])
 
-  const total = attention.length + suggestions.length + ripe.length
+  const recs = curation?.recommendations ?? []
+  const total = attention.length + suggestions.length + ripe.length + recs.length
 
   return (
     <div className="space-y-10">
@@ -34,6 +38,24 @@ export default async function ReviewPage() {
             : `${total} ${total === 1 ? 'thing needs' : 'things need'} you.`}
         </p>
       </header>
+
+      {recs.length > 0 && (
+        <section>
+          <h2 className="mb-1 text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+            Worth sharing now
+          </h2>
+          {curation && (
+            <p className="mb-3 text-xs text-zinc-400 dark:text-zinc-500">
+              The curator re-read {curation.batch.considered} to pick these.
+            </p>
+          )}
+          <div className="space-y-4">
+            {recs.map((r) => (
+              <RecommendationCard key={r.id} rec={r} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {ripe.length > 0 && (
         <section>

@@ -42,6 +42,10 @@ export async function GET(req: Request) {
       steps.maintain = await run(`${base}/api/maintain`, 'POST')
     }
 
+    // Daily curation after judge: post-cooldown verdicts change the corpus,
+    // so the day's best share candidates get re-ranked even on no-entry days.
+    steps.curate = await run(`${base}/api/curate`, 'POST')
+
     return NextResponse.json({ ok: true, steps })
   } catch (err) {
     return failed('tick', err)

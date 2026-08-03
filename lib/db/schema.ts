@@ -325,6 +325,74 @@ export const proposals = pgTable(
   (t) => [index('proposals_status_idx').on(t.status)],
 )
 
+/* -------------------------------------------------------------- curator -- */
+
+export type SharingMode = 'template' | 'draft'
+export type RecommendationStatus = 'open' | 'dismissed' | 'used' | 'stale'
+
+/**
+ * One curator run over the whole corpus. The greeting is the agent's one
+ * conversational line on the app's front door; `considered` is the
+ * transparency ledger of what it actually read.
+ */
+export const curationBatches = pgTable('curation_batches', {
+  id: text('id').primaryKey(),
+  trigger: text('trigger').$type<'entry' | 'manual' | 'cron'>().notNull(),
+  greeting: text('greeting').notNull(),
+  considered: text('considered').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
+/**
+ * A share candidate with its case made in the open. Never a finished post:
+ * the artifact is a template with gaps (default) or an editable draft built
+ * only from the user's own material. A new batch marks prior open rows
+ * `stale` — anything can resurface in a later batch, nothing is a stage.
+ */
+export const recommendations = pgTable(
+  'recommendations',
+  {
+    id: text('id').primaryKey(),
+    batchId: text('batch_id')
+      .notNull()
+      .references(() => curationBatches.id, { onDelete: 'cascade' }),
+    sourceKind: text('source_kind').$type<'thread' | 'entry'>().notNull(),
+    threadId: text('thread_id'),
+    entryId: text('entry_id'),
+    title: text('title').notNull(),
+    /** Why it meets Show Your Work — names the principles. */
+    meetsStandards: text('meets_standards').notNull(),
+    /** Why sharing now advances the North Star — what changed. */
+    whyNow: text('why_now').notNull(),
+    mode: text('mode').$type<SharingMode>().notNull(),
+    artifact: text('artifact').notNull(),
+    score: real('score').notNull(),
+    status: text('status')
+      .$type<RecommendationStatus>()
+      .notNull()
+      .default('open'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+  },
+  (t) => [index('recommendations_status_idx').on(t.status)],
+)
+
+/** Tiny KV for the sharing-mode toggle and future knobs. */
+export const appSettings = pgTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
+export type CurationBatch = typeof curationBatches.$inferSelect
+export type Recommendation = typeof recommendations.$inferSelect
+
 export type Thread = typeof threads.$inferSelect
 export type Proposal = typeof proposals.$inferSelect
 

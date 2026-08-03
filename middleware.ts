@@ -18,6 +18,9 @@ export const config = {
     '/api/proposals/:path*',
     '/api/threads/:path*',
     '/api/maintain',
+    '/api/curate',
+    '/api/settings',
+    '/api/recommendations/:path*',
   ],
 }
 

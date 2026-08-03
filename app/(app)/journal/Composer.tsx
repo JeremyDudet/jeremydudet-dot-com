@@ -33,8 +33,18 @@ const VERDICT_COPY: Record<JournalVerdict, { label: string; tone: string }> = {
  * at exactly the moment you'd want it. The mic floats bottom-right as the one
  * big affordance on an empty page; while recording it grows into a timer chip.
  */
-export function Composer({ canRecord }: { canRecord: boolean }) {
-  const [body, setBody] = useState('')
+export function Composer({
+  canRecord,
+  initialBody,
+  recId,
+}: {
+  canRecord: boolean
+  /** Prefill from a curator recommendation — a template or draft to write into. */
+  initialBody?: string
+  /** When set, a successful save marks the recommendation used. */
+  recId?: string
+}) {
+  const [body, setBody] = useState(initialBody ?? '')
   const [sealed, setSealed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [verdict, setVerdict] = useState<Verdict | null>(null)
@@ -98,6 +108,16 @@ export function Composer({ canRecord }: { canRecord: boolean }) {
 
     const json = await res.json()
     reset()
+
+    // Writing-from-a-recommendation completed — record that it was taken up.
+    // Fire-and-forget: a failed marker never blocks the save that mattered.
+    if (recId) {
+      fetch(`/api/recommendations/${recId}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'use' }),
+      }).catch(() => null)
+    }
 
     if (json.entry?.verdict) setVerdict(json.entry as Verdict)
     else setNote(sealed ? 'Sealed. Not sent to Grok.' : 'Saved.')

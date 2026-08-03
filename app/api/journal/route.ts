@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
+import { runCurator } from '@/lib/curator'
 import { randomUUID } from 'node:crypto'
 import { assertAdmin, assertCanCapture } from '@/lib/admin-auth'
 import { judgeEntry } from '@/lib/judge'
@@ -79,6 +80,17 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error('[journal] matcher failed', err)
     }
+
+    // The curator re-reads the whole corpus after every entry — but after the
+    // response, so capture stays fast. Recommendations land in Review and on
+    // the Write tab moments later.
+    after(async () => {
+      try {
+        await runCurator('entry')
+      } catch (err) {
+        console.error('[journal] curator failed', err)
+      }
+    })
     return NextResponse.json({ entry: { ...entry, ...verdict, status: 'judged' } })
   } catch (err) {
     // The entry is already saved — a judge failure must never lose writing.
