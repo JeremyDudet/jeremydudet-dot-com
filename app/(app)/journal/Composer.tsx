@@ -54,6 +54,9 @@ export function Composer({
       box.current?.focus()
     },
     onError: setNote,
+    // The composer is where lost speech hurts — recordings persist locally
+    // until their transcript lands, and unsent ones recover on reopen.
+    durable: true,
   })
 
   // Grow with the text so the caret never hides below the fold.

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { assertAdmin } from '@/lib/admin-auth'
 import { needsYou } from '@/lib/db/review'
+import { publishPulse, type PublishPulse } from '@/lib/db/stats'
 import { transcriptionConfigured } from '@/lib/transcribe'
 import { AttentionCard } from './AttentionCard'
 import { ProcessingNotice } from './ProcessingNotice'
@@ -19,8 +20,10 @@ export const metadata: Metadata = { title: 'Needs you' }
  */
 export default async function NeedsYouPage() {
   await assertAdmin()
-  const { blog, shares, questions, develop, resolved, processingCount, considered } =
-    await needsYou()
+  const [
+    { blog, shares, questions, develop, resolved, processingCount, considered },
+    pulse,
+  ] = await Promise.all([needsYou(), publishPulse().catch(() => null)])
   const canRecord = transcriptionConfigured()
 
   const total =
@@ -39,6 +42,11 @@ export default async function NeedsYouPage() {
               : 'Nothing needs you.'
             : `${total} ${total === 1 ? 'thing needs' : 'things need'} you.`}
         </p>
+        {pulse && (
+          <p className="text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
+            {pulseLine(pulse)}
+          </p>
+        )}
         {processingCount > 0 && <ProcessingNotice count={processingCount} />}
       </header>
 
@@ -117,4 +125,23 @@ export default async function NeedsYouPage() {
       )}
     </div>
   )
+}
+
+/** The mission in one quiet line: recency, volume, and whether the judge's
+ *  proposals actually ship. */
+function pulseLine(p: PublishPulse): string {
+  const recency =
+    p.streak >= 2
+      ? `${p.streak}-day streak`
+      : p.daysSince == null
+        ? 'Nothing on X yet'
+        : p.daysSince === 0
+          ? 'Posted today'
+          : `Last posted ${p.daysSince}d ago`
+
+  const parts = [recency, `${p.postsLast7} this week`]
+  if (p.proposed30 > 0) {
+    parts.push(`${p.shipped30} of ${p.proposed30} proposals shipped (30d)`)
+  }
+  return parts.join(' · ')
 }

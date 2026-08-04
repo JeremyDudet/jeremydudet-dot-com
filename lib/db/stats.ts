@@ -21,6 +21,98 @@ export type Dashboard = {
   crosspostEnabled: boolean
 }
 
+export type PublishPulse = {
+  /** Consecutive local days with a post, counting back from today/yesterday. */
+  streak: number
+  /** Days since anything went to X; null = never. 0 = today. */
+  daysSince: number | null
+  postsLast7: number
+  /** Journal entries the judge proposed for X in the last 30 days… */
+  proposed30: number
+  /** …and how many of them actually shipped. */
+  shipped30: number
+}
+
+/**
+ * The only numbers that measure the mission: is work actually getting
+ * shared, and is the judge's taste calibrated (proposed vs shipped)?
+ * Shown at the top of Needs you. Replies and reposts don't count —
+ * sharing work means original posts.
+ */
+export async function publishPulse(): Promise<PublishPulse> {
+  const { rows: [agg] } = await db.execute<{
+    last_posted: string | null
+    last7: number
+    proposed30: number
+    shipped30: number
+  }>(sql`
+    select
+      (select max(created_at) from posts
+         where not is_reply and not is_repost) as last_posted,
+      (select count(*) from posts
+         where not is_reply and not is_repost
+           and created_at > now() - interval '7 days')::int as last7,
+      (select count(*) from journal
+         where verdict = 'post'
+           and judged_at > now() - interval '30 days')::int as proposed30,
+      (select count(*) from journal
+         where verdict = 'post'
+           and judged_at > now() - interval '30 days'
+           and post_id is not null)::int as shipped30
+  `)
+
+  // Day boundaries in his timezone, not UTC — a 9pm Austin post is "today",
+  // and the streak math is meaningless otherwise.
+  const { rows: days } = await db.execute<{ d: string }>(sql`
+    select distinct (created_at at time zone 'America/Chicago')::date::text as d
+    from posts
+    where not is_reply and not is_repost
+      and created_at > now() - interval '90 days'
+    order by d desc
+  `)
+
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'America/Chicago',
+  })
+  const dayMs = 86_400_000
+  const toUtcDay = (iso: string) => Date.parse(`${iso}T00:00:00Z`)
+
+  let streak = 0
+  if (days.length) {
+    const gapFromToday = Math.round(
+      (toUtcDay(today) - toUtcDay(days[0].d)) / dayMs,
+    )
+    // A streak survives overnight (posted yesterday, nothing yet today).
+    if (gapFromToday <= 1) {
+      streak = 1
+      for (let i = 1; i < days.length; i++) {
+        const gap = Math.round(
+          (toUtcDay(days[i - 1].d) - toUtcDay(days[i].d)) / dayMs,
+        )
+        if (gap !== 1) break
+        streak++
+      }
+    }
+  }
+
+  const lastDay = agg.last_posted
+    ? new Date(agg.last_posted).toLocaleDateString('en-CA', {
+        timeZone: 'America/Chicago',
+      })
+    : null
+  const daysSince = lastDay
+    ? Math.max(0, Math.round((toUtcDay(today) - toUtcDay(lastDay)) / dayMs))
+    : null
+
+  return {
+    streak,
+    daysSince,
+    postsLast7: agg.last7,
+    proposed30: agg.proposed30,
+    shipped30: agg.shipped30,
+  }
+}
+
 /**
  * One round trip per group rather than per number — this page is behind auth
  * and hit rarely, but Neon charges by compute-second and every query wakes it.
