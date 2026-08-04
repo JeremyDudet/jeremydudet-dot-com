@@ -56,6 +56,15 @@ export async function POST(
           { status: 400 },
         )
       }
+      // The 'essay' verdict is assigned by the harvest action alone — the
+      // judge's output enum can't produce it, so a re-judge here would
+      // silently overwrite the marker and drop the draft from its queue.
+      if (entry.verdict === 'essay') {
+        return NextResponse.json(
+          { error: 'essay drafts are not re-judged' },
+          { status: 400 },
+        )
+      }
       const feedback = await feedbackFor('judge').catch(() => [])
       const verdict = await judgeEntry(entry.body, {
         spoken: entry.spoken,

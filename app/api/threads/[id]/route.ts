@@ -77,10 +77,11 @@ export async function POST(
     }
 
     case 'harvest': {
-      // Assemble the raw material into a draft that flows through the normal
-      // pipeline as a develop entry — the blog's entries table requires an X
-      // post behind it, so a harvest can't skip the queue and shouldn't:
-      // long-form still deserves the same gates as everything else.
+      // Assemble the raw material into a durable draft, seeded synchronously
+      // as an 'essay' — a verdict only this action assigns, never a model —
+      // so it surfaces on Needs-you as a reviewable essay card instead of
+      // skipping the queue: long-form still deserves the same gates as
+      // everything else.
       const members = await threadEntries(id)
       const draft = [
         thread.summary,
@@ -96,11 +97,14 @@ export async function POST(
         body: draft,
         sealed: false,
         status: 'judged',
-        verdict: 'develop',
+        verdict: 'essay',
         score: 5,
         reason: `Harvested from thread "${thread.name}" — ${members.length} entries. Turn this into the long-form piece.`,
         suggested: draft,
         judgedAt: new Date(),
+        // Born in a thread — nothing to match. Without this the matcher sweep
+        // picks up the draft and can file the whole essay into another thread.
+        matchedAt: new Date(),
         threadId: id,
       })
       await updateThread(id, { state: 'harvested' })

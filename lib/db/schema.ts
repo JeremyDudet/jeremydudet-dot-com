@@ -397,8 +397,10 @@ export type Recommendation = typeof recommendations.$inferSelect
 export type Thread = typeof threads.$inferSelect
 export type Proposal = typeof proposals.$inferSelect
 
-/** What Grok decides a raw entry is. */
-export type JournalVerdict = 'private' | 'post' | 'develop'
+/** What a journal entry is editorially. The judge only ever outputs the
+ *  first three; 'essay' marks a harvested long-form draft and is assigned by
+ *  the harvest action alone — no model can produce it. */
+export type JournalVerdict = 'private' | 'post' | 'develop' | 'essay'
 
 /** Where the entry is in its life, independent of the verdict. */
 export type JournalStatus =
