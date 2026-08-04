@@ -20,7 +20,8 @@ export type EmailEntry = {
   slug: string
   title: string
   body: string
-  postId: string
+  /** Null for harvested essays — no X permalink exists for them. */
+  postId: string | null
   postedAt: Date
   media: Media[]
 }
@@ -158,13 +159,17 @@ function TweetCard({
               >
                 Read on the blog
               </Link>
-              {'  ·  '}
-              <Link
-                href={permalink(entry.postId, AUTHOR.handle)}
-                style={{ color: MUTED, textDecoration: 'none' }}
-              >
-                View on X
-              </Link>
+              {entry.postId && (
+                <>
+                  {'  ·  '}
+                  <Link
+                    href={permalink(entry.postId, AUTHOR.handle)}
+                    style={{ color: MUTED, textDecoration: 'none' }}
+                  >
+                    View on X
+                  </Link>
+                </>
+              )}
             </Text>
           </td>
         </tr>

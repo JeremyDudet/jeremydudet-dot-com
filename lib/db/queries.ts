@@ -1,4 +1,5 @@
 import { and, desc, eq, gte, inArray, isNull, lt, notExists, sql } from 'drizzle-orm'
+import { slugify } from '@/lib/judge'
 import { db } from './index'
 import {
   decisions,
@@ -422,6 +423,30 @@ export async function uniqueSlug(base: string): Promise<string> {
 
 export async function createEntry(row: typeof entries.$inferInsert) {
   await db.insert(entries).values(row).onConflictDoNothing()
+}
+
+/**
+ * A pending blog entry for a harvested essay. No posts row backs it — postId
+ * stays null and `source: 'harvest'` marks the origin — so it enters the same
+ * pending → approved → published machine as everything else, just without the
+ * X detour. `postedAt` is "when shipped": the publish tap, since an essay was
+ * never tweeted. Returns the slug so the caller can point at the entry.
+ */
+export async function createEssayEntry(input: {
+  title: string
+  body: string
+}): Promise<string> {
+  const slug = await uniqueSlug(slugify(input.title) || 'essay')
+  await db.insert(entries).values({
+    slug,
+    postId: null,
+    source: 'harvest',
+    title: input.title,
+    body: input.body,
+    status: 'pending',
+    postedAt: new Date(),
+  })
+  return slug
 }
 
 export async function entriesByStatus(status: EntryStatus): Promise<Entry[]> {

@@ -80,6 +80,18 @@ export function EssayCard({
     if (ok?.ok) lastSaved.current = draft
   }
 
+  /** Two-tap publish (Review & edit → Publish to blog), no undo here: the
+   *  entry lands `pending` on the blog queue, where approval stays reversible
+   *  until the publish cron runs — that queue is the undo. */
+  async function publishEssay() {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    setBusy(true)
+    setError(null)
+    const result = await call({ action: 'publish_essay', text })
+    if (result) router.refresh()
+    setBusy(false)
+  }
+
   async function reject(feedback: { text: string; spoken: boolean } | null) {
     setBusy(true)
     setError(null)
@@ -163,9 +175,9 @@ export function EssayCard({
         <div className="mt-3 flex flex-wrap gap-2">
           {panel === 'edit' ? (
             <>
-              {/* Publishing to the blog arrives with the essay entry path —
-                  until then the draft is editable but can only be rejected. */}
-              <Primary disabled>Publish to blog</Primary>
+              <Primary disabled={busy || !text.trim()} onClick={publishEssay}>
+                Publish to blog
+              </Primary>
               <Ghost disabled={busy} onClick={() => setPanel('none')}>
                 Close
               </Ghost>

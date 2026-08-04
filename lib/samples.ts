@@ -123,6 +123,7 @@ export function orSamples<T>(entries: T[], samples: T[]): T[] {
 /** Sample entries shaped like database rows, for page-level previews. */
 export const SAMPLE_DB_ENTRIES = SAMPLE_ENTRIES.map((e) => ({
   ...e,
+  source: 'x' as const,
   tags: ['stockcount', 'churn'],
   status: 'published' as const,
   publishedAt: e.postedAt,
