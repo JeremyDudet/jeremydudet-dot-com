@@ -13,17 +13,30 @@ import {
   Text,
 } from '@react-email/components'
 import { AUTHOR, SITE, absolute } from '@/lib/metadata'
+import { stripMarkdown } from '@/lib/markdown'
 import { excerpt, parse, permalink } from '@/lib/tweet-text'
-import type { Media } from '@/lib/db/schema'
+import type { EntrySource, Media } from '@/lib/db/schema'
 
 export type EmailEntry = {
   slug: string
   title: string
   body: string
+  /** 'x' renders as the tweet it was; 'harvest' as a title + excerpt teaser. */
+  source: EntrySource
   /** Null for harvested essays — no X permalink exists for them. */
   postId: string | null
   postedAt: Date
   media: Media[]
+}
+
+/**
+ * What an entry says in one line of plain prose. An essay body is markdown,
+ * so it goes through stripMarkdown first — an email must never show a "# ".
+ */
+export function preview(entry: EmailEntry, max = 140) {
+  return entry.source === 'harvest'
+    ? excerpt(stripMarkdown(entry.body), max)
+    : excerpt(entry.body, max)
 }
 
 type Props = {
@@ -53,12 +66,19 @@ export function PostEmail({
       <Head />
       {/* Preview text is the grey line next to the subject in the inbox —
           use the post's own opening line so it reads like the tweet. */}
-      <Preview>{first ? excerpt(first.body, 120) : SITE.name}</Preview>
+      <Preview>{first ? preview(first, 120) : SITE.name}</Preview>
       <Body style={body}>
         <Container style={container}>
           {entries.map((entry, i) => (
             <Section key={entry.slug} style={i > 0 ? { marginTop: 16 } : undefined}>
-              <TweetCard entry={entry} baseUrl={baseUrl} />
+              {/* An essay is markdown, and there is no honest way to render
+                  markdown in email — so it goes out as title, excerpt, and a
+                  link to the real thing. */}
+              {entry.source === 'harvest' ? (
+                <EssayCard entry={entry} baseUrl={baseUrl} />
+              ) : (
+                <TweetCard entry={entry} baseUrl={baseUrl} />
+              )}
             </Section>
           ))}
 
@@ -75,6 +95,52 @@ export function PostEmail({
         </Container>
       </Body>
     </Html>
+  )
+}
+
+/**
+ * A harvested essay in the inbox. No avatar row and no body: the tweet card's
+ * chrome is about *who* posted, and an essay's card is about *what it says*.
+ * The permalink is the whole point — the essay lives on the blog.
+ */
+function EssayCard({
+  entry,
+  baseUrl,
+}: {
+  entry: EmailEntry
+  baseUrl: string
+}) {
+  const teaser = preview(entry, 280)
+  const href = `${baseUrl}/blog/${entry.slug}`
+
+  return (
+    <table style={card} cellPadding={0} cellSpacing={0} role="presentation">
+      <tbody>
+        <tr>
+          <td style={{ padding: 20 }}>
+            <Text style={kicker}>
+              Essay
+              {'  ·  '}
+              {entry.postedAt.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </Text>
+            <Text style={essayTitle}>
+              <Link href={href} style={{ color: INK, textDecoration: 'none' }}>
+                {entry.title}
+              </Link>
+            </Text>
+            {teaser && <Text style={essayExcerpt}>{teaser}</Text>}
+            <Text style={meta}>
+              <Link href={href} style={{ color: BLUE, textDecoration: 'none' }}>
+                Read the essay →
+              </Link>
+            </Text>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   )
 }
 
@@ -221,6 +287,34 @@ const post = {
   lineHeight: '24px',
   color: '#27272a',
   whiteSpace: 'pre-wrap' as const,
+}
+
+const kicker = {
+  margin: 0,
+  fontFamily: FONT,
+  fontSize: 12,
+  lineHeight: '16px',
+  fontWeight: 600,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase' as const,
+  color: MUTED,
+}
+
+const essayTitle = {
+  margin: '10px 0 0',
+  fontFamily: FONT,
+  fontSize: 22,
+  lineHeight: '30px',
+  fontWeight: 600,
+  color: INK,
+}
+
+const essayExcerpt = {
+  margin: '12px 0 0',
+  fontFamily: FONT,
+  fontSize: 15,
+  lineHeight: '24px',
+  color: '#52525b',
 }
 
 const meta = {

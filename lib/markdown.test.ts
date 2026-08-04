@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extractTitle, stripMarkdown } from './markdown'
+import { extractTitle, stripMarkdown, stripTitle } from './markdown'
 
 describe('extractTitle', () => {
   it('reads the leading # heading', () => {
@@ -32,6 +32,42 @@ describe('extractTitle', () => {
 
   it('takes the first of several # headings', () => {
     expect(extractTitle('# First\n\ntext\n\n# Second')).toBe('First')
+  })
+})
+
+describe('stripTitle', () => {
+  it('removes the leading # heading so the h1 is not printed twice', () => {
+    expect(stripTitle('# The eight things\n\nBody text.')).toBe('Body text.')
+  })
+
+  it('keeps deeper headings — they are the essay structure', () => {
+    expect(stripTitle('# Title\n\n## Section\n\nBody.')).toBe(
+      '## Section\n\nBody.',
+    )
+  })
+
+  it('removes only the first # heading', () => {
+    expect(stripTitle('# First\n\ntext\n\n# Second\n\nmore')).toBe(
+      'text\n\n# Second\n\nmore',
+    )
+  })
+
+  it('keeps anything written above the heading', () => {
+    expect(stripTitle('A stray preamble.\n\n# Real title\n\nBody.')).toBe(
+      'A stray preamble.\n\nBody.',
+    )
+  })
+
+  it('returns the body unchanged when there is no # heading', () => {
+    expect(stripTitle('Just prose.\nMore prose.')).toBe(
+      'Just prose.\nMore prose.',
+    )
+  })
+
+  it('agrees with extractTitle about which heading is the title', () => {
+    const md = '# Title\n\n# Later heading\n\nBody.'
+    expect(extractTitle(md)).toBe('Title')
+    expect(stripTitle(md)).toBe('# Later heading\n\nBody.')
   })
 })
 

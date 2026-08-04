@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { authorize, failed } from '@/lib/cron'
 import { PostEmail } from '@/emails/PostEmail'
+import type { EmailEntry } from '@/emails/PostEmail'
 import { emailProvider, sendMail } from '@/lib/email'
 import { activeSubscribers, issueExists, recordIssue, unsentEntries } from '@/lib/db/queries'
 import { SITE } from '@/lib/metadata'
@@ -62,15 +63,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ skipped: 'raced', issueId })
     }
 
+    // An essay's body opens with its markdown title heading, so its first
+    // line as a subject would literally read "# ...". Essays announce
+    // themselves by title; posts still lead with their own opening line.
     const subject =
       entries.length === 1
-        ? excerpt(entries[0].body, 80)
+        ? entries[0].source === 'harvest'
+          ? excerpt(entries[0].title, 80)
+          : excerpt(entries[0].body, 80)
         : `${entries.length} new posts`
 
-    const payload = entries.map((e) => ({
+    const payload: EmailEntry[] = entries.map((e) => ({
       slug: e.slug,
       title: e.title,
       body: e.body,
+      source: e.source,
       postId: e.postId,
       postedAt: e.postedAt,
       media: e.media,

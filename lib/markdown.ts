@@ -19,6 +19,24 @@ export function extractTitle(md: string): string | null {
 }
 
 /**
+ * The draft minus its title heading. The blog renders the title as its own
+ * `h1` from `entries.title`, so leaving the heading in the body would print
+ * it twice. Only the heading `extractTitle` picked is removed — every other
+ * `#` line is section structure and stays.
+ */
+export function stripTitle(md: string): string {
+  const lines = md.split('\n')
+  const at = lines.findIndex((line) => /^#\s+.+$/.test(line.trim()))
+  if (at === -1) return md.trim()
+  // Splice, not slice — anything above the heading is still his writing.
+  lines.splice(at, 1)
+  // Removing the line between two blank ones would leave a double gap, which
+  // markdown reads as an empty paragraph.
+  if (at > 0 && lines[at - 1] === '' && lines[at] === '') lines.splice(at, 1)
+  return lines.join('\n').trim()
+}
+
+/**
  * Markdown → plain prose, for excerpts (the blog index and the newsletter,
  * neither of which should ever carry raw markdown). Headings and horizontal
  * rules are structure, not prose, so their lines are dropped entirely — an
