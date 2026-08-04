@@ -2,12 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import clsx from 'clsx'
 import type { ShareEntry } from '@/lib/db/review'
 import { FeedbackInput, UndoBar } from './FeedbackInput'
 
 /**
  * A share proposal backed by a journal entry: the draft is `suggested`, the
  * publish path is the existing claim → post → record chain.
+ *
+ * The card shows the WHOLE draft — this exact text is what would go to X, so
+ * hiding it behind a tap would make the card unreadable as a decision. Long
+ * drafts clamp with a Show-all toggle. Posting stays two-tap (Review & post
+ * → Post it) because a public post is not undoable.
  *
  * The draft persists as you type (debounced save_draft), so refining survives
  * the app being backgrounded — mobile Safari kills pages without asking.
@@ -25,7 +31,10 @@ export function ShareCard({
   const [error, setError] = useState<string | null>(null)
   const [panel, setPanel] = useState<'none' | 'edit' | 'reject'>('none')
   const [text, setText] = useState(item.body)
+  const [expanded, setExpanded] = useState(false)
   const [rejected, setRejected] = useState<{ feedbackId?: string } | null>(null)
+
+  const isLong = text.length > 400 || text.split('\n').length > 8
 
   const lastSaved = useRef(item.body)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -115,30 +124,52 @@ export function ShareCard({
           Ready to post
         </span>
         {item.score != null && (
-          <span className="tabular-nums text-zinc-400 dark:text-zinc-500">
+          <span
+            title="How ready the judge thinks this is, 0–10"
+            className="tabular-nums text-zinc-400 dark:text-zinc-500"
+          >
             {item.score}/10
           </span>
         )}
+        <span className="text-zinc-400 dark:text-zinc-500">
+          the draft below is exactly what would go to X
+        </span>
       </div>
 
-      <p className="text-[15px]/6 font-medium text-zinc-950 dark:text-white">
-        {item.title}
-      </p>
-
-      {item.reason && (
-        <p className="mt-2 border-l-2 border-zinc-200 pl-3 text-sm text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-400">
-          {item.reason}
-        </p>
-      )}
-
-      {panel === 'edit' && (
+      {panel === 'edit' ? (
         <textarea
           value={text}
           onChange={(e) => scheduleSave(e.target.value)}
           onBlur={() => void persistDraft(text)}
-          rows={8}
-          className="mt-3 w-full resize-none rounded-xl bg-zinc-50 p-3 text-sm text-zinc-950 ring-1 ring-zinc-950/10 outline-none dark:bg-zinc-900 dark:text-white dark:ring-white/15"
+          rows={Math.min(14, Math.max(6, text.split('\n').length + 2))}
+          autoFocus
+          className="mt-1 w-full resize-none rounded-xl bg-zinc-50 p-3 text-[15px]/6 text-zinc-950 ring-1 ring-zinc-950/10 outline-none dark:bg-zinc-900 dark:text-white dark:ring-white/15"
         />
+      ) : (
+        <>
+          <p
+            className={clsx(
+              'text-[15px]/6 font-medium whitespace-pre-wrap text-zinc-950 dark:text-white',
+              isLong && !expanded && 'line-clamp-[8]',
+            )}
+          >
+            {text}
+          </p>
+          {isLong && (
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="mt-1 text-xs font-medium text-zinc-500 underline underline-offset-2 dark:text-zinc-400"
+            >
+              {expanded ? 'Show less' : 'Show all'}
+            </button>
+          )}
+        </>
+      )}
+
+      {item.reason && panel !== 'edit' && (
+        <p className="mt-2 border-l-2 border-zinc-200 pl-3 text-sm text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-400">
+          Editor: {item.reason}
+        </p>
       )}
 
       {error && (

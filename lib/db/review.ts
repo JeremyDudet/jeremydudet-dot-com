@@ -44,20 +44,20 @@ export type Share =
 
 export type ShareEntry = {
   id: string
-  title: string
-  /** The current draft: suggested (possibly human-refined) or the raw body. */
+  /** The current draft: suggested (possibly human-refined) or the raw body.
+   *  Shown in full on the card — this exact text is what would be posted. */
   body: string
   reason: string | null
   /** Raw judge score, 0–10, for display. */
   score: number | null
 }
 
-/** A follow-up question, with enough of its root to decide on sight. */
+/** A follow-up question, with its root entry readable in full. */
 export type QuestionItem = {
   id: string
   question: string
   entryId: string
-  rootTitle: string
+  rootBody: string
   createdAt: Date
 }
 
@@ -166,7 +166,6 @@ export async function needsYou(): Promise<NeedsYou> {
       createdAt: j.createdAt,
       entry: {
         id: j.id,
-        title: firstLine(j.suggested ?? j.body),
         body: j.suggested ?? j.body,
         reason: j.reason,
         score: j.score,
@@ -198,7 +197,7 @@ export async function needsYou(): Promise<NeedsYou> {
     id: q.id,
     question: q.question,
     entryId: q.entryId,
-    rootTitle: firstLine(rootBody.get(q.entryId) ?? ''),
+    rootBody: rootBody.get(q.entryId) ?? '',
     createdAt: q.createdAt,
   }))
 

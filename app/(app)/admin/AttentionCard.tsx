@@ -22,11 +22,12 @@ const KIND = {
 export function AttentionCard({ item }: { item: Attention }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
-  const [text, setText] = useState(item.body)
-  const [open, setOpen] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const kind = KIND[item.kind]
+  // Develop cards show the raw entry itself — clamped, never truncated away.
+  const isLong = item.body.length > 400 || item.body.split('\n').length > 6
 
   async function journalAction(payload: object) {
     setBusy(true)
@@ -71,23 +72,35 @@ export function AttentionCard({ item }: { item: Attention }) {
         )}
       </div>
 
-      <p className="text-[15px]/6 font-medium text-zinc-950 dark:text-white">
-        {item.title}
-      </p>
-
-      {item.reason && (
-        <p className="mt-2 border-l-2 border-zinc-200 pl-3 text-sm text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-400">
-          {item.reason}
+      {item.kind === 'develop' ? (
+        <>
+          <p
+            className={clsx(
+              'text-[15px]/6 font-medium whitespace-pre-wrap text-zinc-950 dark:text-white',
+              isLong && !expanded && 'line-clamp-[6]',
+            )}
+          >
+            {item.body}
+          </p>
+          {isLong && (
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="mt-1 text-xs font-medium text-zinc-500 underline underline-offset-2 dark:text-zinc-400"
+            >
+              {expanded ? 'Show less' : 'Show all'}
+            </button>
+          )}
+        </>
+      ) : (
+        <p className="text-[15px]/6 font-medium text-zinc-950 dark:text-white">
+          {item.title}
         </p>
       )}
 
-      {open && (
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={8}
-          className="mt-3 w-full resize-none rounded-xl bg-zinc-50 p-3 text-sm text-zinc-950 ring-1 ring-zinc-950/10 outline-none dark:bg-zinc-900 dark:text-white dark:ring-white/15"
-        />
+      {item.reason && (
+        <p className="mt-2 border-l-2 border-zinc-200 pl-3 text-sm text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-400">
+          Editor: {item.reason}
+        </p>
       )}
 
       {error && (
@@ -108,17 +121,12 @@ export function AttentionCard({ item }: { item: Attention }) {
 
         {item.kind === 'develop' && (
           <>
-            <Primary disabled={busy} onClick={() => setOpen((o) => !o)}>
-              {open ? 'Hide' : 'Work on it'}
+            <Primary
+              disabled={busy}
+              onClick={() => journalAction({ action: 'judge' })}
+            >
+              Re-judge
             </Primary>
-            {open && (
-              <Primary
-                disabled={busy || text.trim() === item.body}
-                onClick={() => journalAction({ action: 'judge' })}
-              >
-                Re-judge
-              </Primary>
-            )}
             <Ghost
               disabled={busy}
               onClick={() => journalAction({ action: 'archive' })}

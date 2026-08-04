@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import clsx from 'clsx'
 import type { QuestionItem } from '@/lib/db/review'
 
 /**
@@ -12,7 +13,11 @@ import type { QuestionItem } from '@/lib/db/review'
 export function QuestionCard({ item }: { item: QuestionItem }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isLong =
+    item.rootBody.length > 240 || item.rootBody.split('\n').length > 3
 
   async function act(action: 'dismiss' | 'drop') {
     setBusy(true)
@@ -43,9 +48,24 @@ export function QuestionCard({ item }: { item: QuestionItem }) {
         {item.question}
       </p>
 
-      <p className="mt-2 border-l-2 border-zinc-200 pl-3 text-sm text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-400">
-        About: {item.rootTitle}
-      </p>
+      <div className="mt-2 border-l-2 border-zinc-200 pl-3 dark:border-zinc-700">
+        <p
+          className={clsx(
+            'text-sm whitespace-pre-wrap text-zinc-600 italic dark:text-zinc-400',
+            isLong && !expanded && 'line-clamp-3',
+          )}
+        >
+          Your entry: {item.rootBody}
+        </p>
+        {isLong && (
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="mt-1 text-xs font-medium text-zinc-500 underline underline-offset-2 dark:text-zinc-400"
+          >
+            {expanded ? 'Show less' : 'Show all'}
+          </button>
+        )}
+      </div>
 
       {error && (
         <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
