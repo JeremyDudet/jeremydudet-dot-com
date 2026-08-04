@@ -37,11 +37,18 @@ export async function threadById(id: string) {
   return row
 }
 
+/**
+ * Thread members, sealed excluded — matching visibleEntries() et al. Both
+ * consumers hand these bodies to a model (the librarian's weekly digest and
+ * the harvest draft), and the answer path can file a sealed answer into a
+ * thread (it inherits the root's threadId; sealed only skips processing).
+ * Sealed means "never sent to xAI", so the filter has to live here.
+ */
 export async function threadEntries(threadId: string) {
   return db
     .select()
     .from(journal)
-    .where(eq(journal.threadId, threadId))
+    .where(and(eq(journal.threadId, threadId), eq(journal.sealed, false)))
     .orderBy(journal.createdAt)
 }
 
