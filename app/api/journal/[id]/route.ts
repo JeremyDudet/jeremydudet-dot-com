@@ -35,6 +35,18 @@ type Action =
   | { action: 'post'; text: string }
   | { action: 'publish_essay'; text: string }
 
+/**
+ * Has this entry already shipped? `postId` alone can't answer it: essays
+ * publish to the blog and never get one, so a null postId means "not an X
+ * post", not "still in the queue". `status: 'posted'` is what claimForPosting
+ * sets on both paths, making it the durable marker — and the one a reject
+ * would otherwise overwrite, resurrecting a published essay for a second trip
+ * through the queue.
+ */
+function alreadyShipped(entry: { postId: string | null; status: string }) {
+  return Boolean(entry.postId) || entry.status === 'posted'
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -88,6 +100,11 @@ export async function POST(
     // feedback lands synchronously; distillation runs after the response so
     // rejecting feels like submitting.
     case 'reject': {
+      // A shipped entry has nothing left to reject, and archiving one would
+      // erase the 'posted' marker that proves it shipped.
+      if (alreadyShipped(entry)) {
+        return NextResponse.json({ error: 'already posted' }, { status: 409 })
+      }
       await setJournalStatus(id, 'archived')
 
       const raw = payload.feedback?.trim()
@@ -114,7 +131,7 @@ export async function POST(
     // Undo a reject. The retracted feedback row goes with it — an oops must
     // not teach the system anything.
     case 'restore': {
-      if (entry.postId) {
+      if (alreadyShipped(entry)) {
         return NextResponse.json({ error: 'already posted' }, { status: 409 })
       }
       await setJournalStatus(id, 'judged')
@@ -131,7 +148,7 @@ export async function POST(
       if (!text) {
         return NextResponse.json({ error: 'empty text' }, { status: 400 })
       }
-      if (entry.postId) {
+      if (alreadyShipped(entry)) {
         return NextResponse.json({ error: 'already posted' }, { status: 409 })
       }
       await saveDraft(id, text)
