@@ -63,6 +63,8 @@ export type QuestionItem = {
 
 export type NeedsYou = {
   blog: Attention[]
+  /** Harvested essay drafts awaiting review — publish to blog or reject. */
+  essays: ShareEntry[]
   shares: Share[]
   questions: QuestionItem[]
   develop: Attention[]
@@ -77,6 +79,7 @@ export type NeedsYou = {
 export async function needsYou(): Promise<NeedsYou> {
   const [
     pendingEntries,
+    essayDrafts,
     readyToPost,
     toDevelop,
     openRecs,
@@ -100,6 +103,16 @@ export async function needsYou(): Promise<NeedsYou> {
         .innerJoin(posts, eq(posts.id, entries.postId))
         .where(eq(entries.status, 'pending'))
         .orderBy(desc(entries.postedAt)),
+
+      // Harvested essay drafts. 'essay' is assigned by the harvest action
+      // alone, so the post/develop buckets below exclude these for free.
+      db
+        .select()
+        .from(journal)
+        .where(
+          and(eq(journal.verdict, 'essay'), eq(journal.status, 'judged')),
+        )
+        .orderBy(desc(journal.createdAt)),
 
       // Judged worth posting, never sent.
       db
@@ -146,6 +159,13 @@ export async function needsYou(): Promise<NeedsYou> {
         () => [] as { question: string; rootBody: string }[],
       ),
     ])
+
+  const essays: ShareEntry[] = essayDrafts.map((j) => ({
+    id: j.id,
+    body: j.suggested ?? j.body,
+    reason: j.reason,
+    score: j.score,
+  }))
 
   const blog: Attention[] = pendingEntries.map((e) => ({
     id: e.slug,
@@ -222,6 +242,7 @@ export async function needsYou(): Promise<NeedsYou> {
 
   return {
     blog,
+    essays,
     shares,
     questions,
     develop,

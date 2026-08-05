@@ -5,6 +5,7 @@ import { GitHubStats } from "@/components/GitHubStats";
 import { StockcountProject } from "@/components/StockcountProject";
 import { GitHubIcon, LinkedInIcon, XIcon } from "@/components/SocialIcons";
 import { PostCard } from "@/components/PostCard";
+import { EssayCard } from "@/components/Essay";
 import { SubscribeForm } from "@/components/SubscribeForm";
 import { recentEntries, subscriberCount } from "@/lib/db/queries";
 import { SAMPLE_DB_ENTRIES, orSamples } from "@/lib/samples";
@@ -185,17 +186,29 @@ export async function Introduction() {
                 <Text className="mt-6">Nothing published yet.</Text>
               ) : (
                 <div className="mt-6 space-y-4">
-                  {posts.map((post) => (
-                    <PostCard
-                      key={post.slug}
-                      postId={post.postId}
-                      body={post.body}
-                      postedAt={post.postedAt}
-                      media={post.media}
-                      href={`/blog/${post.slug}`}
-                      clamp
-                    />
-                  ))}
+                  {posts.map((post) =>
+                    // Same branch the blog index makes — the home page reads
+                    // from the same table and must not print raw markdown.
+                    post.source === "harvest" ? (
+                      <EssayCard
+                        key={post.slug}
+                        title={post.title}
+                        body={post.body}
+                        postedAt={post.postedAt}
+                        href={`/blog/${post.slug}`}
+                      />
+                    ) : (
+                      <PostCard
+                        key={post.slug}
+                        postId={post.postId}
+                        body={post.body}
+                        postedAt={post.postedAt}
+                        media={post.media}
+                        href={`/blog/${post.slug}`}
+                        clamp
+                      />
+                    ),
+                  )}
                 </div>
               )}
             </div>

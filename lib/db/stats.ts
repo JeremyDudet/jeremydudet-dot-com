@@ -33,6 +33,30 @@ export type PublishPulse = {
   shipped30: number
 }
 
+const dayMs = 86_400_000
+const toUtcDay = (iso: string) => Date.parse(`${iso}T00:00:00Z`)
+
+/**
+ * The streak day-walk, pure so it's testable without rows. `days` is the
+ * distinct local posting days as YYYY-MM-DD strings, newest first; `today`
+ * is the same format. A streak survives overnight (posted yesterday,
+ * nothing yet today) but a two-day gap breaks it.
+ */
+export function computeStreak(days: string[], today: string): number {
+  if (!days.length) return 0
+
+  const gapFromToday = Math.round((toUtcDay(today) - toUtcDay(days[0])) / dayMs)
+  if (gapFromToday > 1) return 0
+
+  let streak = 1
+  for (let i = 1; i < days.length; i++) {
+    const gap = Math.round((toUtcDay(days[i - 1]) - toUtcDay(days[i])) / dayMs)
+    if (gap !== 1) break
+    streak++
+  }
+  return streak
+}
+
 /**
  * The only numbers that measure the mission: is work actually getting
  * shared, and is the judge's taste calibrated (proposed vs shipped)?
@@ -74,26 +98,8 @@ export async function publishPulse(): Promise<PublishPulse> {
   const today = new Date().toLocaleDateString('en-CA', {
     timeZone: 'America/Chicago',
   })
-  const dayMs = 86_400_000
-  const toUtcDay = (iso: string) => Date.parse(`${iso}T00:00:00Z`)
 
-  let streak = 0
-  if (days.length) {
-    const gapFromToday = Math.round(
-      (toUtcDay(today) - toUtcDay(days[0].d)) / dayMs,
-    )
-    // A streak survives overnight (posted yesterday, nothing yet today).
-    if (gapFromToday <= 1) {
-      streak = 1
-      for (let i = 1; i < days.length; i++) {
-        const gap = Math.round(
-          (toUtcDay(days[i - 1].d) - toUtcDay(days[i].d)) / dayMs,
-        )
-        if (gap !== 1) break
-        streak++
-      }
-    }
-  }
+  const streak = computeStreak(days.map((r) => r.d), today)
 
   const lastDay = agg.last_posted
     ? new Date(agg.last_posted).toLocaleDateString('en-CA', {

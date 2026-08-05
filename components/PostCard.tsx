@@ -5,7 +5,9 @@ import type { Media } from '@/lib/db/schema'
 import { VerifiedBadge } from '@/components/SocialIcons'
 
 type PostCardProps = {
-  postId: string
+  /** Null for harvested essays, which never existed on X — the footer's
+   *  "View on X" link simply disappears for them. */
+  postId: string | null
   body: string
   postedAt: Date
   media?: Media[]
@@ -117,13 +119,17 @@ export function PostCard({
       )}
 
       <footer className="mt-4 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-        <a
-          href={permalink(postId, AUTHOR.handle)}
-          className="hover:text-zinc-950 dark:hover:text-white"
-        >
-          View on X
-        </a>
-        <span aria-hidden>·</span>
+        {postId && (
+          <>
+            <a
+              href={permalink(postId, AUTHOR.handle)}
+              className="hover:text-zinc-950 dark:hover:text-white"
+            >
+              View on X
+            </a>
+            <span aria-hidden>·</span>
+          </>
+        )}
         <time dateTime={postedAt.toISOString()}>
           {postedAt.toLocaleDateString('en-US', {
             month: 'long',

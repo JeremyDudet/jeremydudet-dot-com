@@ -1,4 +1,17 @@
 import { NextResponse } from 'next/server'
+import type { Cadence } from '@/lib/db/schema'
+
+/**
+ * Which newsletter cadences fire today. Monday for weekly, the 1st for
+ * monthly. Pure — lives here rather than in the tick route so it can be
+ * tested without pulling in the route module.
+ */
+export function due(now: Date): Cadence[] {
+  const out: Cadence[] = ['daily']
+  if (now.getUTCDay() === 1) out.push('weekly')
+  if (now.getUTCDate() === 1) out.push('monthly')
+  return out
+}
 
 /**
  * Vercel Cron sends `Authorization: Bearer $CRON_SECRET`. Without this check

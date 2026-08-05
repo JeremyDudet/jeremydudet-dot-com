@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { authorize, failed } from '@/lib/cron'
+import { authorize, due, failed } from '@/lib/cron'
 import { SITE } from '@/lib/metadata'
-import type { Cadence } from '@/lib/db/schema'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -54,14 +53,6 @@ export async function GET(req: Request) {
   } catch (err) {
     return failed('tick', err)
   }
-}
-
-/** Which cadences fire today. Monday for weekly, the 1st for monthly. */
-function due(now: Date): Cadence[] {
-  const out: Cadence[] = ['daily']
-  if (now.getUTCDay() === 1) out.push('weekly')
-  if (now.getUTCDate() === 1) out.push('monthly')
-  return out
 }
 
 /**

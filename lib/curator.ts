@@ -285,7 +285,10 @@ candidates rather than working from digests alone.
 `.trim()
 }
 
-const TEMPLATE_RULES = `
+/** Exported for the essay writer (lib/essay-writer.ts): a harvested thread is
+ *  shaped by the same sharing mode as a share proposal, and the rules are the
+ *  standard — one copy, not two that drift. */
+export const TEMPLATE_RULES = `
 ARTIFACT = A TEMPLATE, NEVER PROSE. He writes the post; you build the
 scaffold. Rules:
 - Markdown skeleton: 3-6 short section prompts in his logical order.
@@ -297,7 +300,8 @@ scaffold. Rules:
   something the corpus doesn't contain, that is a gap, not a guess.
 `.trim()
 
-const DRAFT_RULES = `
+/** Exported alongside TEMPLATE_RULES — see the note there. */
+export const DRAFT_RULES = `
 ARTIFACT = AN EDITABLE DRAFT, NEVER A FINISHED POST. Rules:
 - Assemble prose ONLY from what he actually wrote — his events, his numbers,
   his phrasing wherever possible. You may reorder and connect; you may not

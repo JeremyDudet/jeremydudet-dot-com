@@ -1,3 +1,4 @@
+import typography from '@tailwindcss/typography'
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
@@ -29,7 +30,9 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  // Harvested essays are the only long-form content on the site; `prose`
+  // classes exist for them and nothing else renders with them.
+  plugins: [typography],
 }
 
 export default config

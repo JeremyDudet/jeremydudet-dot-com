@@ -84,19 +84,52 @@ export const SAMPLE_POSTS: Post[] = [
   }),
 ]
 
+/** A harvested essay, so the long-form path can be judged without a database. */
+const SHELF_ESSAY = `# The eight things that walk
+
+I built Stockcount assuming a full count was the job. Three months of watching people actually do it says otherwise.
+
+## What I saw
+
+Nobody counts everything. They count the things that move:
+
+- the well vodka
+- the house tequila
+- limes
+- the two draft lines that blow out
+
+Everything else gets counted once a month, and **nobody looks at the number**.
+
+## What that means for the product
+
+A full count is a compliance ritual. The eight things are the job. So the app should open on the eight things, every Tuesday, and finish in under ten minutes.
+
+Import comes later, once you already believe it works.`
+
 /** What the newsletter would contain — only posts that clear the gate. */
 export const SAMPLE_ENTRIES: EmailEntry[] = [
   {
     slug: 'diagnosing-customer-churn-part-2',
     title: 'Diagnosing customer churn, part 2',
     body: CHURN_POST,
+    source: 'x',
     postId: '1',
     postedAt: new Date('2026-07-29T15:12:00Z'),
     media: [],
   },
   {
+    slug: 'the-eight-things-that-walk',
+    title: 'The eight things that walk',
+    body: SHELF_ESSAY,
+    source: 'harvest',
+    postId: null,
+    postedAt: new Date('2026-07-26T14:00:00Z'),
+    media: [],
+  },
+  {
     slug: 'what-operators-actually-count',
     title: 'What operators actually count',
+    source: 'x',
     body: `Spent the morning behind the bar at a place in East Austin watching them do inventory.
 
 They don't count everything. They count the eight things that walk: the well vodka, the house tequila, limes, the two draft lines that blow out, and whatever the kitchen is short on that week.

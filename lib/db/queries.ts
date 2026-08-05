@@ -1,4 +1,5 @@
 import { and, desc, eq, gte, inArray, isNull, lt, notExists, sql } from 'drizzle-orm'
+import { slugify } from '@/lib/judge'
 import { db } from './index'
 import {
   decisions,
@@ -215,6 +216,37 @@ export async function saveDraft(id: string, text: string) {
 }
 
 /**
+ * The essay writer's one write, and the only guarded version of saveDraft.
+ * The writer pass runs in after() while the card is already on screen, so it
+ * must never land on top of a head start he typed in the meantime.
+ *
+ * Both conditions are checked in SQL rather than read-then-written, so there
+ * is no window at all: `suggested = body` is what "still the seeded
+ * concatenation" means (harvest writes the two identically, and save_draft
+ * only ever touches `suggested`), and `status = 'judged'` means the draft is
+ * still sitting in the queue rather than published or dropped.
+ *
+ * Returns false when the write was skipped — his version stands.
+ */
+export async function writeComposedDraft(
+  id: string,
+  text: string,
+): Promise<boolean> {
+  const rows = await db
+    .update(journal)
+    .set({ suggested: text })
+    .where(
+      and(
+        eq(journal.id, id),
+        eq(journal.status, 'judged'),
+        sql`${journal.suggested} = ${journal.body}`,
+      ),
+    )
+    .returning({ id: journal.id })
+  return rows.length > 0
+}
+
+/**
  * Claim an entry for judging. after() on capture and the sweep route both
  * process through this conditional update, so a row can never be judged
  * twice concurrently. A claim older than 5 minutes is treated as dead —
@@ -422,6 +454,30 @@ export async function uniqueSlug(base: string): Promise<string> {
 
 export async function createEntry(row: typeof entries.$inferInsert) {
   await db.insert(entries).values(row).onConflictDoNothing()
+}
+
+/**
+ * A pending blog entry for a harvested essay. No posts row backs it — postId
+ * stays null and `source: 'harvest'` marks the origin — so it enters the same
+ * pending → approved → published machine as everything else, just without the
+ * X detour. `postedAt` is "when shipped": the publish tap, since an essay was
+ * never tweeted. Returns the slug so the caller can point at the entry.
+ */
+export async function createEssayEntry(input: {
+  title: string
+  body: string
+}): Promise<string> {
+  const slug = await uniqueSlug(slugify(input.title) || 'essay')
+  await db.insert(entries).values({
+    slug,
+    postId: null,
+    source: 'harvest',
+    title: input.title,
+    body: input.body,
+    status: 'pending',
+    postedAt: new Date(),
+  })
+  return slug
 }
 
 export async function entriesByStatus(status: EntryStatus): Promise<Entry[]> {

@@ -37,11 +37,18 @@ export async function threadById(id: string) {
   return row
 }
 
+/**
+ * Thread members, sealed excluded — matching visibleEntries() et al. Both
+ * consumers hand these bodies to a model (the librarian's weekly digest and
+ * the harvest draft), and the answer path can file a sealed answer into a
+ * thread (it inherits the root's threadId; sealed only skips processing).
+ * Sealed means "never sent to xAI", so the filter has to live here.
+ */
 export async function threadEntries(threadId: string) {
   return db
     .select()
     .from(journal)
-    .where(eq(journal.threadId, threadId))
+    .where(and(eq(journal.threadId, threadId), eq(journal.sealed, false)))
     .orderBy(journal.createdAt)
 }
 
@@ -97,6 +104,23 @@ export async function updateThread(
       updatedAt: new Date(),
     })
     .where(eq(threads.id, id))
+}
+
+/**
+ * Claim a thread for harvest — the same conditional-update idiom as
+ * claimForPosting. The state flip *is* the lock, so a double-tap seeds one
+ * essay draft rather than two, and schedules one writer pass rather than two
+ * (each of which is a model call and a second card in the queue).
+ *
+ * Returns false when the thread was already harvested; the caller 409s.
+ */
+export async function claimForHarvest(id: string): Promise<boolean> {
+  const rows = await db
+    .update(threads)
+    .set({ state: 'harvested', updatedAt: new Date() })
+    .where(and(eq(threads.id, id), ne(threads.state, 'harvested')))
+    .returning({ id: threads.id })
+  return rows.length > 0
 }
 
 export async function detachEntry(entryId: string) {

@@ -1,8 +1,10 @@
 import { NextResponse, after } from 'next/server'
 import { assertAdmin } from '@/lib/admin-auth'
 import { judgeEntry } from '@/lib/judge'
+import { extractTitle } from '@/lib/markdown'
 import { maybeAskQuestion } from '@/lib/process-entry'
 import { publish } from '@/lib/social'
+import { threadById } from '@/lib/db/zettel'
 import {
   deleteFeedback,
   distillFeedback,
@@ -11,6 +13,7 @@ import {
 } from '@/lib/feedback'
 import {
   claimForPosting,
+  createEssayEntry,
   journalEntry,
   recordJournalPost,
   releasePostingClaim,
@@ -30,6 +33,19 @@ type Action =
   | { action: 'restore'; feedbackId?: string }
   | { action: 'save_draft'; text: string }
   | { action: 'post'; text: string }
+  | { action: 'publish_essay'; text: string }
+
+/**
+ * Has this entry already shipped? `postId` alone can't answer it: essays
+ * publish to the blog and never get one, so a null postId means "not an X
+ * post", not "still in the queue". `status: 'posted'` is what claimForPosting
+ * sets on both paths, making it the durable marker — and the one a reject
+ * would otherwise overwrite, resurrecting a published essay for a second trip
+ * through the queue.
+ */
+function alreadyShipped(entry: { postId: string | null; status: string }) {
+  return Boolean(entry.postId) || entry.status === 'posted'
+}
 
 export async function POST(
   req: Request,
@@ -56,6 +72,15 @@ export async function POST(
           { status: 400 },
         )
       }
+      // The 'essay' verdict is assigned by the harvest action alone — the
+      // judge's output enum can't produce it, so a re-judge here would
+      // silently overwrite the marker and drop the draft from its queue.
+      if (entry.verdict === 'essay') {
+        return NextResponse.json(
+          { error: 'essay drafts are not re-judged' },
+          { status: 400 },
+        )
+      }
       const feedback = await feedbackFor('judge').catch(() => [])
       const verdict = await judgeEntry(entry.body, {
         spoken: entry.spoken,
@@ -75,6 +100,11 @@ export async function POST(
     // feedback lands synchronously; distillation runs after the response so
     // rejecting feels like submitting.
     case 'reject': {
+      // A shipped entry has nothing left to reject, and archiving one would
+      // erase the 'posted' marker that proves it shipped.
+      if (alreadyShipped(entry)) {
+        return NextResponse.json({ error: 'already posted' }, { status: 409 })
+      }
       await setJournalStatus(id, 'archived')
 
       const raw = payload.feedback?.trim()
@@ -101,7 +131,7 @@ export async function POST(
     // Undo a reject. The retracted feedback row goes with it — an oops must
     // not teach the system anything.
     case 'restore': {
-      if (entry.postId) {
+      if (alreadyShipped(entry)) {
         return NextResponse.json({ error: 'already posted' }, { status: 409 })
       }
       await setJournalStatus(id, 'judged')
@@ -118,7 +148,7 @@ export async function POST(
       if (!text) {
         return NextResponse.json({ error: 'empty text' }, { status: 400 })
       }
-      if (entry.postId) {
+      if (alreadyShipped(entry)) {
         return NextResponse.json({ error: 'already posted' }, { status: 409 })
       }
       await saveDraft(id, text)
@@ -126,6 +156,16 @@ export async function POST(
     }
 
     case 'post': {
+      // Essay drafts publish to the blog, never to X — tweeting a multi-week
+      // markdown draft would be a category error. After publish the claim's
+      // status flip already 409s this; the guard blocks a hand-crafted call
+      // before publish too.
+      if (entry.verdict === 'essay') {
+        return NextResponse.json(
+          { error: 'essay drafts publish to the blog, not X' },
+          { status: 400 },
+        )
+      }
       const text = payload.text?.trim()
       if (!text) {
         return NextResponse.json({ error: 'empty text' }, { status: 400 })
@@ -202,6 +242,69 @@ export async function POST(
         await releasePostingClaim(id)
         const message = err instanceof Error ? err.message : String(err)
         return NextResponse.json({ error: message }, { status: 502 })
+      }
+    }
+
+    // Publish a harvested essay straight to the blog's pending queue. No X
+    // round-trip and no blog judge (a filter for tweets) — but never past the
+    // human: the entry still rides the existing pending → approved → cron
+    // `published` promotion, so this tap is not the tap that ships it.
+    case 'publish_essay': {
+      if (entry.verdict !== 'essay') {
+        return NextResponse.json(
+          { error: 'only essay drafts publish to the blog' },
+          { status: 400 },
+        )
+      }
+      const text = payload.text?.trim()
+      if (!text) {
+        return NextResponse.json({ error: 'empty text' }, { status: 400 })
+      }
+
+      // Claim before creating the entry. Two taps on a slow connection must
+      // not seed two pending blog entries — same idiom as posting to X.
+      if (!(await claimForPosting(id))) {
+        return NextResponse.json({ error: 'already in flight' }, { status: 409 })
+      }
+
+      try {
+        // The title lives in the draft itself: its first `# ` heading, with
+        // the thread name as the fallback the writer pass also uses.
+        const thread = entry.threadId
+          ? await threadById(entry.threadId)
+          : undefined
+        const title = extractTitle(text) ?? thread?.name ?? 'Untitled essay'
+        const slug = await createEssayEntry({ title, body: text })
+
+        // The journal row stays status 'posted' with postId null — "posted"
+        // stretches to mean "shipped"; the entries row is the real record.
+
+        // The positive half of the taste loop, same as the X post path: what
+        // he changed before publishing reveals taste the way a rejection does.
+        const draft = (entry.suggested ?? entry.body).trim()
+        if (text !== draft) {
+          after(async () => {
+            try {
+              const feedbackId = await recordFeedback({
+                subjectKind: 'entry',
+                subjectId: id,
+                entryId: id,
+                threadId: entry.threadId,
+                raw: text,
+                sentiment: 'positive',
+              })
+              await distillFeedback(feedbackId, draft)
+            } catch (err) {
+              console.error('[journal] edit-delta feedback failed', err)
+            }
+          })
+        }
+
+        return NextResponse.json({ ok: true, slug })
+      } catch (err) {
+        await releasePostingClaim(id)
+        const message = err instanceof Error ? err.message : String(err)
+        return NextResponse.json({ error: message }, { status: 500 })
       }
     }
 

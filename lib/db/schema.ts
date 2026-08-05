@@ -92,19 +92,22 @@ export const decisions = pgTable(
 )
 
 export type EntryStatus = 'pending' | 'approved' | 'rejected' | 'published'
+export type EntrySource = 'x' | 'harvest'
 
 /**
- * A blog entry. Created when a verdict says publish; only reaches the site
- * once a human flips it to `published`. `body` is the post text verbatim —
- * threads joined — so the page and the email can render it exactly as tweeted.
+ * A blog entry. Two origins, one state machine: 'x' entries are posts the
+ * blog judge promoted (body rendered exactly as tweeted); 'harvest' entries
+ * are essays composed from a ripe thread and published directly — they skip
+ * the blog judge (a filter for tweets), never the human. Only a human flip
+ * to `published` reaches the site either way.
  */
 export const entries = pgTable(
   'entries',
   {
     slug: text('slug').primaryKey(),
-    postId: text('post_id')
-      .notNull()
-      .references(() => posts.id, { onDelete: 'cascade' }),
+    /** Null for essays — they never existed on X. */
+    postId: text('post_id').references(() => posts.id, { onDelete: 'cascade' }),
+    source: text('source').$type<EntrySource>().notNull().default('x'),
 
     title: text('title').notNull(),
     body: text('body').notNull(),
@@ -112,7 +115,8 @@ export const entries = pgTable(
     media: jsonb('media').$type<Media[]>().notNull().default([]),
 
     status: text('status').$type<EntryStatus>().notNull().default('pending'),
-    postedAt: timestamp('posted_at', { withTimezone: true }).notNull(), // when tweeted
+    /** When it shipped: tweeted for 'x' entries, published-tap for essays. */
+    postedAt: timestamp('posted_at', { withTimezone: true }).notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }), // when it hit the site
 
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -397,8 +401,10 @@ export type Recommendation = typeof recommendations.$inferSelect
 export type Thread = typeof threads.$inferSelect
 export type Proposal = typeof proposals.$inferSelect
 
-/** What Grok decides a raw entry is. */
-export type JournalVerdict = 'private' | 'post' | 'develop'
+/** What a journal entry is editorially. The judge only ever outputs the
+ *  first three; 'essay' marks a harvested long-form draft and is assigned by
+ *  the harvest action alone — no model can produce it. */
+export type JournalVerdict = 'private' | 'post' | 'develop' | 'essay'
 
 /** Where the entry is in its life, independent of the verdict. */
 export type JournalStatus =

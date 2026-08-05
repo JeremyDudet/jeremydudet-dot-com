@@ -25,3 +25,6 @@ dist-ssr
 *.sw?
 .vercel
 *.tsbuildinfo
+
+# Riptide artifacts (cloud-synced)
+.humanlayer/tasks/

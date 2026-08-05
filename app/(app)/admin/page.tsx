@@ -4,6 +4,7 @@ import { needsYou } from '@/lib/db/review'
 import { publishPulse, type PublishPulse } from '@/lib/db/stats'
 import { transcriptionConfigured } from '@/lib/transcribe'
 import { AttentionCard } from './AttentionCard'
+import { EssayCard } from './EssayCard'
 import { ProcessingNotice } from './ProcessingNotice'
 import { QuestionCard } from './QuestionCard'
 import { RecommendationCard } from './RecommendationCard'
@@ -21,13 +22,26 @@ export const metadata: Metadata = { title: 'Needs you' }
 export default async function NeedsYouPage() {
   await assertAdmin()
   const [
-    { blog, shares, questions, develop, resolved, processingCount, considered },
+    {
+      blog,
+      essays,
+      shares,
+      questions,
+      develop,
+      resolved,
+      processingCount,
+      considered,
+    },
     pulse,
   ] = await Promise.all([needsYou(), publishPulse().catch(() => null)])
   const canRecord = transcriptionConfigured()
 
   const total =
-    blog.length + shares.length + questions.length + develop.length
+    blog.length +
+    essays.length +
+    shares.length +
+    questions.length +
+    develop.length
 
   return (
     <div className="space-y-10">
@@ -55,6 +69,23 @@ export default async function NeedsYouPage() {
           {blog.map((item) => (
             <AttentionCard key={`blog-${item.id}`} item={item} />
           ))}
+        </section>
+      )}
+
+      {essays.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+            Essay drafts
+          </h2>
+          <div className="space-y-4">
+            {essays.map((item) => (
+              <EssayCard
+                key={`essay-${item.id}`}
+                item={item}
+                canRecord={canRecord}
+              />
+            ))}
+          </div>
         </section>
       )}
 

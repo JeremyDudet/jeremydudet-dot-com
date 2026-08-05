@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import { Container } from '@/components/Container'
 import { Text } from '@/components/ui/text'
 import { PostCard } from '@/components/PostCard'
+import { Essay } from '@/components/Essay'
 import { SubscribeForm } from '@/components/SubscribeForm'
 import { entryBySlug, publishedEntries } from '@/lib/db/queries'
 import { SAMPLE_DB_ENTRIES } from '@/lib/samples'
+import { stripMarkdown } from '@/lib/markdown'
 import { excerpt } from '@/lib/tweet-text'
 
 export const revalidate = 3600
@@ -30,7 +32,12 @@ export async function generateMetadata({
   const entry = await entryBySlug(slug)
   if (!entry) return {}
 
-  const description = excerpt(entry.body, 160)
+  // An essay's body opens with "# " — a search result or a link preview must
+  // never show markup, so essays describe themselves from stripped prose.
+  const description =
+    entry.source === 'harvest'
+      ? excerpt(stripMarkdown(entry.body), 160)
+      : excerpt(entry.body, 160)
   return {
     title: entry.title,
     description,
@@ -70,14 +77,24 @@ export default async function EntryPage({
         </a>
       </nav>
 
-      {/* No <h1> render — the post is the post. The title exists for search
-          engines, the index, and the email subject line, not for the page. */}
-      <PostCard
-        postId={entry.postId}
-        body={entry.body}
-        postedAt={entry.postedAt}
-        media={entry.media}
-      />
+      {entry.source === 'harvest' ? (
+        // An essay is not a post: it earns a title, headings, and the room to
+        // be read straight through.
+        <Essay
+          title={entry.title}
+          body={entry.body}
+          postedAt={entry.postedAt}
+        />
+      ) : (
+        /* No <h1> render — the post is the post. The title exists for search
+           engines, the index, and the email subject line, not for the page. */
+        <PostCard
+          postId={entry.postId}
+          body={entry.body}
+          postedAt={entry.postedAt}
+          media={entry.media}
+        />
+      )}
 
       {entry.tags.length > 0 && (
         <Text className="mt-6">
