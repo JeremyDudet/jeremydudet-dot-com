@@ -71,7 +71,12 @@ export function EssayCard({
 
   async function persistDraft(value: string) {
     const draft = value.trim()
-    if (!draft || draft === lastSaved.current) return
+    // Compare trimmed against trimmed: the seeded body can carry surrounding
+    // whitespace, and saving a merely-trimmed copy would make `suggested`
+    // differ from `body` — which the writer pass reads as "he already edited
+    // this" and then permanently skips its compose. Opening an editor and
+    // closing it is not an edit.
+    if (!draft || draft === lastSaved.current.trim()) return
     const ok = await fetch(`/api/journal/${item.id}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

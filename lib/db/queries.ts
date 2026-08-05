@@ -216,6 +216,37 @@ export async function saveDraft(id: string, text: string) {
 }
 
 /**
+ * The essay writer's one write, and the only guarded version of saveDraft.
+ * The writer pass runs in after() while the card is already on screen, so it
+ * must never land on top of a head start he typed in the meantime.
+ *
+ * Both conditions are checked in SQL rather than read-then-written, so there
+ * is no window at all: `suggested = body` is what "still the seeded
+ * concatenation" means (harvest writes the two identically, and save_draft
+ * only ever touches `suggested`), and `status = 'judged'` means the draft is
+ * still sitting in the queue rather than published or dropped.
+ *
+ * Returns false when the write was skipped — his version stands.
+ */
+export async function writeComposedDraft(
+  id: string,
+  text: string,
+): Promise<boolean> {
+  const rows = await db
+    .update(journal)
+    .set({ suggested: text })
+    .where(
+      and(
+        eq(journal.id, id),
+        eq(journal.status, 'judged'),
+        sql`${journal.suggested} = ${journal.body}`,
+      ),
+    )
+    .returning({ id: journal.id })
+  return rows.length > 0
+}
+
+/**
  * Claim an entry for judging. after() on capture and the sweep route both
  * process through this conditional update, so a row can never be judged
  * twice concurrently. A claim older than 5 minutes is treated as dead —

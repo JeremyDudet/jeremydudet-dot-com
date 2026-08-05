@@ -106,6 +106,23 @@ export async function updateThread(
     .where(eq(threads.id, id))
 }
 
+/**
+ * Claim a thread for harvest — the same conditional-update idiom as
+ * claimForPosting. The state flip *is* the lock, so a double-tap seeds one
+ * essay draft rather than two, and schedules one writer pass rather than two
+ * (each of which is a model call and a second card in the queue).
+ *
+ * Returns false when the thread was already harvested; the caller 409s.
+ */
+export async function claimForHarvest(id: string): Promise<boolean> {
+  const rows = await db
+    .update(threads)
+    .set({ state: 'harvested', updatedAt: new Date() })
+    .where(and(eq(threads.id, id), ne(threads.state, 'harvested')))
+    .returning({ id: threads.id })
+  return rows.length > 0
+}
+
 export async function detachEntry(entryId: string) {
   await db.update(journal).set({ threadId: null }).where(eq(journal.id, entryId))
 }

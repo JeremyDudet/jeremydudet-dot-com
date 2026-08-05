@@ -88,7 +88,7 @@ export function ThreadActions({ thread }: { thread: Thread }) {
               onClick={() =>
                 act(
                   { action: 'harvest' },
-                  'Draft created — it is in your journal as a develop entry.',
+                  'Draft created — it is waiting on Needs you. The essay is being written now; give it a minute and refresh.',
                 )
               }
               className="rounded-full bg-[#047857] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-30 dark:bg-[#4ade80] dark:text-zinc-950"
